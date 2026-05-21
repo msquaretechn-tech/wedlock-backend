@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Account Suspension</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      .container {
+        background-color: #ffffff;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        color: #007EAF;
+      }
+
+      .reason-box {
+        background-color: #e6f4f9;
+        border-left: 4px solid #007EAF;
+        padding: 15px;
+        margin: 20px 0;
+        font-style: italic;
+        color: #007EAF;
+      }
+
+      .date {
+        color: #555;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+
+      .footer {
+        margin-top: 30px;
+        font-size: 14px;
+        color: #888;
+        text-align: center;
+      }
+
+      a {
+        color: #007EAF;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Account Suspended</h2>
+      <p>Dear <strong><%= name %></strong>,</p>
+
+      <p>
+        We regret to inform you that your account has been suspended due to the
+        following reason:
+      </p>
+
+      <div class="reason-box">
+        <%= reason %>
+      </div>
+
+      <p class="date">
+        <strong>Suspended At:</strong>
+        <%= new Date().toLocaleString() %>
+      </p>
+
+      <p>
+        Dear Wedlock Subscriber,<br><br>
+        We value our community and are committed to maintaining a respectful and secure environment for all our valued members.<br><br>
+        As part of our ongoing moderation process, our team regularly reviews profile information uploaded to the Wedlock platform. During a recent review, we found that the profile introduction associated with your account does not meet our community standards.<br><br>
+        As a result, your account has been temporarily suspended to give you an opportunity to update your content accordingly.<br><br>
+        <strong>What you need to do:</strong><br><br>
+        Please review and update your profile introduction to ensure it aligns with our community guidelines.<br>
+        Once updated, our team will re-evaluate your profile and, if approved, promptly lift the suspension.<br><br>
+        We appreciate your understanding and cooperation in this matter. Ensuring a safe and respectful platform for everyone is our top priority.<br><br>
+        Thank you for being part of the Wedlock community.<br><br>
+        Warm regards,<br>
+        Wedlock Customer Care Team
+      </p>
+
+      <p>
+        If you believe this action was taken in error or have any questions,
+        please contact our support team at <a href="mailto:IT-support@wedlock.com.au
+        ">IT-support@wedlock.com.au</a>.
+      </p>
+
+      <div class="footer">
+        <p>This is an automated message. Please do not reply.</p>
+        <p><a href="https://wedlock.com.au">https://www.wedlock.com.au</a></p>
+        <p>Copyright © 2025 Wedlock</p>
+      </div>
+    </div>
+  </body>
+</html>

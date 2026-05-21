@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedlock Invoice</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #EEF2FF; margin: 0; padding: 20px; color: #1F2937;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+        <tr>
+            <td style="background: #2563EB; color: white; padding: 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td style="font-size: 24px; font-weight: bold;">Wedlock</td>
+                        <td style="font-size: 14px; opacity: 0.75; text-align: right;">Invoice #<%= orderId %></td>
+                    </tr>
+                </table>
+                <div style="font-size: 18px; opacity: 0.9;">Hello <%= name %>,</div>
+                <div style="font-size: 20px; font-weight: 500; margin-top: 8px;">Thank you for choosing our <%= planType %> plan!</div>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: #F9FAFB; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                    <tr>
+                        <td style="font-size: 18px; font-weight: 600; color: #1F2937; margin-bottom: 16px;">Order Summary</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="color: #6B7280;">Plan Name</td>
+                                    <td style="font-weight: 500; text-align: right;"><%= planName %></td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #6B7280;">Plan Type</td>
+                                    <td style="font-weight: 500; text-align: right;"><%= planType %></td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #6B7280;">Valid Until</td>
+                                    <td style="font-weight: 500; text-align: right;"><%= validUpto %></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="height: 1px; background: #E5E7EB; margin: 12px 0;"></td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #6B7280;">Price inclusive of GST</td>
+                                    <td style="font-weight: 500; text-align: right;">$<%= price %></td>
+                                </tr>
+                                
+                                <tr>
+                                    <td style="font-size: 18px; font-weight: 600; color: #2563EB; padding-top: 12px; border-top: 1px solid #E5E7EB;">Total</td>
+                                    <td style="font-size: 18px; font-weight: 600; color: #2563EB; padding-top: 12px; border-top: 1px solid #E5E7EB; text-align: right;">$<%= total %></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: #F9FAFB; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                    <tr>
+                        <td style="font-size: 18px; font-weight: 600; color: #1F2937; margin-bottom: 16px;">Features Included</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <% features.forEach(function(feature) { %>
+                                    <li style="display: flex; align-items: center; margin-bottom: 8px; color: #4B5563;">
+                                        <span style="color: #10B981; margin-right: 8px;">✓</span>
+                                        <%= feature %>
+                                    </li>
+                                <% }); %>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+
+                <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td align="center">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: auto;">
+                                <tr>
+                                    <td style="padding: 8px;">
+                                        <a href="https://www.wedlock.com.au/contact-us" style="display: inline-flex; align-items: center; color: #2563EB; text-decoration: none; font-weight: 500;">
+                                            <span style="margin-right: 4px;">✉️</span>
+                                            Contact Support
+                                        </a>
+                                    </td>
+                                    <td style="padding: 8px;">
+                                        <a href="https://www.wedlock.com.au/user-dashboard" style="display: inline-flex; align-items: center; color: #2563EB; text-decoration: none; font-weight: 500;">
+                                            <span style="margin-right: 4px;">📊</span>
+                                            View Dashboard
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                
+
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="text-align: center; padding-top: 24px; margin-top: 32px; border-top: 1px solid #E5E7EB; color: #9CA3AF; font-size: 14px;">
+                    <tr>
+                        <td>
+                            <p style="margin: 4px 0;">Thanks for being a great customer!</p>
+                            <p style="margin: 4px 0;">© 2025 Wedlock. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

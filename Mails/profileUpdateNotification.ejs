@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Updated - Wedlock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @font-face {
+            font-family: "Proxima Nova regular";
+            src: url('../public/font/Proxima-Nova-Regular.otf') format("opentype");
+            font-family: "Proxima Nova thin";
+            src: url('../public/font/Proxima-Nova-Thin.otf') format("opentype");
+        }
+
+        body {
+            font-family: "Proxima Nova regular", sans-serif;
+            background-color: #F4F4F4;
+        }
+
+        p {
+            font-family: Proxima Nova thin, sans-serif;
+            color: #4D4D4D;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .main {
+            width: 100%;
+            max-width: 800px;
+            background-color: #FFFFFF;
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .content h3 {
+            margin: 1rem 0 1.5rem;
+            color: #007EAF;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .content p {
+            margin: 0.5rem 0;
+            font-size: 16px;
+            line-height: 24px;
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #666;
+            margin-top: 30px;
+        }
+
+        #title {
+            margin-top: 1rem;
+            margin-bottom: 10px;
+            font-size: 18px;
+            line-height: 21.92px;
+            font-weight: 400;
+            color: #4D4D4D;
+        }
+
+        #name {
+            color: black;
+        }
+
+        a {
+            color: #4D4D4D;
+            text-decoration: none;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media screen and (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .main {
+                padding: 1.5rem;
+            }
+
+            .content h3 {
+                font-size: 26px;
+            }
+
+            .content p {
+                font-size: 14px;
+                line-height: 22px;
+            }
+
+            #title {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="main">
+            <a href="https://www.wedlock.com.au">
+                <img src="https://wedlock.com.au/wedlock-img.jpg" alt="Wedlock Logo" style="max-width: 300px;">
+            </a>
+            <div class="content">
+                <h2 id="title">Hello Admin,</h2>
+                <h3>User Profile Updated</h3>
+
+                <p><strong>Name:</strong> <%= name %></p>
+                <p><strong>User ID:</strong> <%= userId %></p>
+                <p><strong>Email:</strong> <%= email %></p>
+
+                <% if (updatedAbout) { %>
+                    <p><strong>About Themselves:</strong></p>
+                    <p style="padding-left: 10px;">"<%= about %>"</p>
+                <% } %>
+
+                <% if (updatedImages) { %>
+                    <p><strong>Profile Images:</strong> User uploaded new image(s).</p>
+                <% } %>
+
+                <p style="margin-top: 2rem;">Regards,<br>The Wedlock System</p>
+            </div>
+            <div class="footer">
+                <p>The Wedlock Team</p>
+                <p><a href="https://wedlock.com.au">https://www.wedlock.com.au</a></p>
+                <p>Copyright © 2025 Wedlock</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

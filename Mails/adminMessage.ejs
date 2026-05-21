@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= subject %></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Proxima Nova", Arial, sans-serif;
+      background-color: #F4F4F4;
+    }
+
+    p {
+      font-family: "Proxima Nova", sans-serif;
+      color: #4D4D4D;
+    }
+
+    .container {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .main {
+      width: 100%;
+      max-width: 800px;
+      background-color: #FFFFFF;
+      padding: 2rem;
+      border-radius: 8px;
+    }
+
+    #title {
+      margin-top: 1rem;
+      margin-bottom: 10px;
+      font-size: 18px;
+      line-height: 21.92px;
+      font-weight: 400;
+      color: #4D4D4D;
+    }
+
+    .content h3 {
+      margin: 1rem 0;
+      color: #007EAF;
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .content p {
+      margin: 1rem 0;
+      font-size: 16px;
+      line-height: 24px;
+    }
+
+    .footer {
+      font-size: 14px;
+      color: #666;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    a {
+      color: #4D4D4D;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    @media screen and (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+
+      .main {
+        padding: 1.5rem;
+      }
+
+      .content h3 {
+        font-size: 24px;
+        line-height: 32px;
+      }
+
+      .content p {
+        font-size: 14px;
+        line-height: 22px;
+      }
+
+      #title {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="main">
+      <a href="https://www.wedlock.com.au">
+        <img src="https://wedlock.com.au/wedlock-img.jpg" alt="Wedlock Logo" style="max-width: 200px;">
+      </a>
+      <div class="content">
+        <h2 id="title">Admin Notification from <strong>Wedlock</strong></h2>
+        <h3><%= subject %></h3>
+        <p><%= message %></p>
+        <p>Regards,<br />Admin Team</p>
+      </div>
+      <div class="footer">
+        <p>This is an automated message. Please do not reply.</p>
+        <p><a href="https://wedlock.com.au">https://www.wedlock.com.au</a></p>
+        <p>Copyright © 2025 Wedlock</p>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

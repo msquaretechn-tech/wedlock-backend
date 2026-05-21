@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Account Unsuspension</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      .container {
+        background-color: #ffffff;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        color: #007EAF;
+      }
+
+      .message-box {
+        background-color: #e6f9f1;
+        border-left: 4px solid #007EAF;
+        padding: 15px;
+        margin: 20px 0;
+        font-size: 16px;
+        color: #007EAF;
+      }
+
+      .date {
+        color: #555;
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+
+      .footer {
+        margin-top: 30px;
+        font-size: 14px;
+        color: #888;
+        text-align: center;
+      }
+
+      a {
+        color: #007EAF;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Dear <%= name %>,</h2>
+      <div class="message-box">
+        We’re happy to inform you that your account has been reinstated.
+      </div>
+
+      <p>You can now log in and continue using our platform as usual.</p>
+
+      <p class="date">
+        <strong>Reinstated At:</strong> <%= new Date().toLocaleString() %>
+      </p>
+
+      <p>
+        We appreciate your effort in updating your profile to meet our guidelines. Maintaining a safe and respectful platform for all users is a top priority at Wedlock.<br><br>
+        If you have any concerns or need further clarification, please feel free to reach out to our support team at
+        <a href="mailto:IT-support@wedlock.com.au">IT-support@wedlock.com.au</a>.
+      </p>
+
+     
+
+      <div class="footer">
+        <p>This is an automated message. Please do not reply.</p>
+        <p><a href="https://www.wedlock.com.au">https://www.wedlock.com.au</a></p>
+        <p>Copyright © 2025 Wedlock</p>
+      </div>
+    </div>
+  </body>
+</html>
