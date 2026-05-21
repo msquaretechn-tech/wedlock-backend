@@ -152,6 +152,7 @@ export const createCheckoutSession = catchAsyncError(
     }
 );
 
+// for checking the subscription status
 export const checkSubscriptionStatus = catchAsyncError(async (req, res, next) => {
     try {
         const userId = req.user.userId;
