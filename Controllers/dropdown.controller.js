@@ -575,6 +575,9 @@ export const communityDropdown = catchAsyncError(async(req ,res ,next) => {
         };
     });
 
+    // Append static "Not Relevant" option at the end
+    data.push({ id: null, value: "Not Relevant" });
+
     res.status(200).json({
         success: true,
         data: data,
