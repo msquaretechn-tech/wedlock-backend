@@ -4,7 +4,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - Main  # Runs on push to Develop branch
+      - main  # Runs on push to main branch
 
 jobs:
   deploy:
@@ -26,7 +26,7 @@ jobs:
             cd ~/wedlock-backend
 
             echo "Pulling latest Code" 
-            git pull origin Main
+            git pull origin main
 
             echo "Detecting currently running deployment color..."
             CURRENT_RUNNING=\$(docker ps --filter "name=backend-green" --filter "status=running" --format "{{.Names}}")
