@@ -3,4 +3,4 @@
 # local env files
 .env
 .env*.local
-*.json
+config/serviceAccountKey.json
