@@ -13,9 +13,8 @@ jobs:
     steps:      
       - name: Set up SSH key
         run: |
-          printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY_B64 }}" | base64 -d > key.pem
           chmod 600 key.pem
-          ssh-keygen -y -f key.pem
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
