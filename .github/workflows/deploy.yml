@@ -1,4 +1,3 @@
-
 # .github/workflows/deploy.yml
 name: Deploy to VPS
 
@@ -14,8 +13,9 @@ jobs:
     steps:      
       - name: Set up SSH key
         run: |
-          echo "$SSH_PRIVATE_KEY" | base64 -d > key.pem
+          printf "%s" "$SSH_PRIVATE_KEY" > key.pem
           chmod 600 key.pem
+          ssh-keygen -l -f key.pem
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
