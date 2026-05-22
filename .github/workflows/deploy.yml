@@ -13,9 +13,9 @@ jobs:
     steps:      
       - name: Set up SSH key
         run: |
-          printf "%s" "$SSH_PRIVATE_KEY" > key.pem
+          printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
           chmod 600 key.pem
-          ssh-keygen -l -f key.pem
+          ssh-keygen -y -f key.pem
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
