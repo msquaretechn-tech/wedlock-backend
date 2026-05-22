@@ -283,3 +283,8 @@ cron.schedule('0 0 * * *', async () => {
     console.log('Running subscription expiry check at midnight...');
     handleAutoExpiry();
 });
+
+
+/**
+ * END cron job
+ */
