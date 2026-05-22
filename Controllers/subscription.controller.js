@@ -10,12 +10,13 @@ import cron from "node-cron";
 import moment from 'moment';
 import { Op } from "sequelize";
 import paypalClient from "../config/paypal.js";
+import paypal from "@paypal/checkout-server-sdk";
+
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createCheckoutSession = catchAsyncError(
     async (req, res, next) => {
-        console.log("🚀 ~ createCheckoutSession ~ req:", req.body)
 
         try {
             const userId = req.user.userId;
