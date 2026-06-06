@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import paypal from "@paypal/checkout-server-sdk";
 
 function environment() {
