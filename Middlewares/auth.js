@@ -6,13 +6,16 @@ import jwt from "jsonwebtoken";
 //authenticated user
 
 export const isAuthenticated = catchAsyncError(async (req, res, next) => {
-    const accessToken = req.cookies?.access_token || req.header("Authorization");
+    const rawToken = req.cookies?.access_token || req.header("Authorization");
     
-    if (!accessToken) {
+    if (!rawToken) {
         return next(new errorhandler("Please login to Find perfect matches", 400));
     }
 
-    const decoded =  jwt.verify(accessToken, process.env.ACCESSTOKEN);
+    // Strip "Bearer " prefix if present (from Authorization header)
+    const accessToken = rawToken.startsWith("Bearer ") ? rawToken.slice(7) : rawToken;
+
+    const decoded = jwt.verify(accessToken, process.env.ACCESSTOKEN);
 
     if(!decoded){
         return next(new errorhandler("access token is not valid", 400));

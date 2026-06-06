@@ -18,28 +18,28 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export const createCheckoutSession = catchAsyncError(
     async (req, res, next) => {
 
+        const userId = req.user.userId;
+        const { planId: planIdLower, planID: planIdUpper, paymentMethod } = req.body;
+        const planId = planIdLower || planIdUpper; // accept both planId and planID
+
+        if (!planId || !paymentMethod) {
+            return next(
+                new errorhandler(
+                    "Plan ID and payment method are required",
+                    400
+                )
+            );
+        }
+
+        const planData = await plan.findOne({
+            where: { planId },
+        });
+
+        if (!planData) {
+            return next(new errorhandler("Plan not found", 404));
+        }
+
         try {
-            const userId = req.user.userId;
-            const { planId: planIdLower, planID: planIdUpper, paymentMethod } = req.body;
-            const planId = planIdLower || planIdUpper; // accept both planId and planID
-
-            if (!planId || !paymentMethod) {
-                return next(
-                    new errorhandler(
-                        "Plan ID and payment method are required",
-                        400
-                    )
-                );
-            }
-
-            const planData = await plan.findOne({
-                where: { planId },
-            });
-
-            if (!planData) {
-                return next(new errorhandler("Plan not found", 404));
-            }
-
             // ==========================
             // STRIPE PAYMENT
             // ==========================
@@ -138,14 +138,12 @@ export const createCheckoutSession = catchAsyncError(
                 )
             );
         } catch (error) {
-            console.error(
-                "Checkout Error:",
-                error.message
-            );
+            console.error("Checkout Error:", error.message);
+            console.error("Checkout Error Stack:", error.stack || error);
 
             return next(
                 new errorhandler(
-                    "Failed to create checkout session",
+                    error.message || "Failed to create checkout session",
                     500
                 )
             );
