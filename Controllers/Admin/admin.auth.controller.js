@@ -213,7 +213,11 @@ export const updateAdminAccessToken = catchAsyncError(async (req, res, next) => 
 export const forgotPasswordWithOldPass = catchAsyncError(async (req, res, next) => {
   const { email, oldPassword, newPassword } = req.body;
 
-  if (!email || !oldPassword || !newPassword) {
+  // if (!email || !oldPassword || !newPassword) {
+  //   return next(new errorhandler("Email, old password, and new password are required", 400));
+  // }
+
+  if (!email || !newPassword) {
     return next(new errorhandler("Email, old password, and new password are required", 400));
   }
 
