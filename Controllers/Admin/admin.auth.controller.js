@@ -276,11 +276,12 @@ export const verifyOtpAndChangePassword = catchAsyncError(async (req, res, next)
     return next(new errorhandler("Admin not found", 404));
   }
 
+
   // Verify old password
-  const isMatch = await bcrypt.compare(oldPassword, admin.password);
-  if (!isMatch) {
-    return next(new errorhandler("Old password is incorrect", 401));
-  }
+  // const isMatch = await bcrypt.compare(oldPassword, admin.password);
+  // if (!isMatch) {
+  //   return next(new errorhandler("Old password is incorrect", 401));
+  // }
 
   // Update password
   const salt = await bcrypt.genSalt(10);
