@@ -106,64 +106,68 @@ export const deletePlan = catchAsyncError(async (req, res, next) => {
 
 
 export const editPlan = catchAsyncError(async (req, res, next) => {
-  const {
-    planId,
-    price,
-    durationInMonths,
-    description,
-    planType,
-    featureList,
-  } = req.body;
+  try {
+    const {
+      planId,
+      price,
+      durationInMonths,
+      description,
+      planType,
+      featureList,
+    } = req.body;
 
-  if (!planId) return next(new errorhandler("Plan ID is required", 400));
+    if (!planId) return next(new errorhandler("Plan ID is required", 400));
 
-  const existingPlan = await plan.findOne({ where: { planId } });
+    const existingPlan = await plan.findOne({ where: { planId } });
 
-  if (!existingPlan) {
-    return next(new errorhandler("Plan not found", 404));
+    if (!existingPlan) {
+      return next(new errorhandler("Plan not found", 404));
+    }
+
+    // ✅ Create new Stripe product (DO NOT reuse or store productId)
+    const product = await stripe.products.create({
+      name: existingPlan.planName,
+    });
+
+    // ✅ Create new Stripe price linked to that product
+    const newStripePrice = await stripe.prices.create({
+      unit_amount: Math.round(price * 100),
+      currency: "aud",
+      recurring: {
+        interval: planType === "Yearly" ? "year" : "month",
+      },
+      product: product.id,
+    });
+
+    // ✅ Update the plan (but keep planName and planId same)
+    await existingPlan.update({
+      price,
+      durationInMonths,
+      description,
+      planType,
+      featureList,
+      stripePriceId: newStripePrice.id, // update Stripe price ID
+    });
+
+    console.log("📝 Plan updated:", {
+      planId,
+      planName: existingPlan.planName,
+      newPrice: price,
+      durationInMonths,
+      planType,
+      featureList,
+      description,
+      stripePriceId: newStripePrice.id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Plan updated successfully",
+      updatedPlan: existingPlan,
+    });
+  } catch (error) {
+    return next(new errorhandler(error.message, 500));
   }
-
-  // ✅ Create new Stripe product (DO NOT reuse or store productId)
-  const product = await stripe.products.create({
-    name: existingPlan.planName,
-  });
-
-  // ✅ Create new Stripe price linked to that product
-  const newStripePrice = await stripe.prices.create({
-    unit_amount: Math.round(price * 100),
-    currency: "aud",
-    recurring: {
-      interval: planType === "Yearly" ? "year" : "month",
-    },
-    product: product.id,
-  });
-
-  // ✅ Update the plan (but keep planName and planId same)
-  await existingPlan.update({
-    price,
-    durationInMonths,
-    description,
-    planType,
-    featureList,
-    stripePriceId: newStripePrice.id, // update Stripe price ID
-  });
-
-  console.log("📝 Plan updated:", {
-    planId,
-    planName: existingPlan.planName,
-    newPrice: price,
-    durationInMonths,
-    planType,
-    featureList,
-    description,
-    stripePriceId: newStripePrice.id,
-  });
-
-  return res.status(200).json({
-    success: true,
-    message: "Plan updated successfully",
-    updatedPlan: existingPlan,
-  });
 });
 
 

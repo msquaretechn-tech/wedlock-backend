@@ -16,11 +16,11 @@ services:
         environment:
             - TZ=Asia/Kolkata
         healthcheck:
-          test: ["CMD", "curl", "-f", "http://localhost:3005/test"]
-          interval: 10s
-          timeout: 5s
-          retries: 5
-          start_period: 10s
+            test: [ "CMD", "curl", "-f", "http://localhost:3005/test" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
 networks:
-  wedlock-network:
-    external: true
+    wedlock-network:
+        external: true

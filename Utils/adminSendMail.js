@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 
 const sendAdminInfoEmail = async ({ email, subject, template, data }) => {
     console.log("----- Sending Email Process Started -----");
-    
+
     // Log environment details
     console.log(`SMTP_HOST: ${process.env.SMTP_HOST}`);
     console.log(`SMTP_PORT: ${process.env.SMTP_PORT}`);
