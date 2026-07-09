@@ -213,9 +213,9 @@ export const updateAdminAccessToken = catchAsyncError(async (req, res, next) => 
 export const forgotPasswordWithOldPass = catchAsyncError(async (req, res, next) => {
   const { email, oldPassword, newPassword } = req.body;
 
-  // if (!email || !oldPassword || !newPassword) {
-  //   return next(new errorhandler("Email, old password, and new password are required", 400));
-  // }
+  if (!email || !oldPassword || !newPassword) {
+    return next(new errorhandler("Email, old password, and new password are required", 400));
+  }
 
   if (!email || !newPassword) {
     return next(new errorhandler("Email, old password, and new password are required", 400));
@@ -278,10 +278,10 @@ export const verifyOtpAndChangePassword = catchAsyncError(async (req, res, next)
 
 
   // Verify old password
-  // const isMatch = await bcrypt.compare(oldPassword, admin.password);
-  // if (!isMatch) {
-  //   return next(new errorhandler("Old password is incorrect", 401));
-  // }
+  const isMatch = await bcrypt.compare(oldPassword, admin.password);
+  if (!isMatch) {
+    return next(new errorhandler("Old password is incorrect", 401));
+  }
 
   // Update password
   const salt = await bcrypt.genSalt(10);
