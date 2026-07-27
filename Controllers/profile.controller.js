@@ -189,29 +189,6 @@ export const updatePersonalDetails = catchAsyncError(async (req, res, next) => {
 });
 
 
-export const contactDetails = catchAsyncError(async (req, res, next) => {
-  const userId = req.user.userId;
-
-  const { phone, email } = req.body;
-
-  const personalData = await personalDetails.findOne({ where: { userId } });
-
-  if (!personalData) {
-    return next(new errorhandler("Personal details not found!", 400));
-  }
-
-  await personalDetails.update(
-    { phone },
-    { where: { userId } }
-  );
-
-  res.status(201).json({
-    success: true,
-    message: "Contact details updated successfully",
-  });
-});
-
-
 export const updateFamilyDetails = catchAsyncError(async (req, res, next) => {
   const userId = req.user.userId;
   const {
