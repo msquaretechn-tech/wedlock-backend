@@ -29,7 +29,7 @@ profileRouter.get('/allProfiles', isAuthenticated, allProfiles)
 profileRouter.get('/discoverProfiles', isAuthenticated, discoverProfiles)
 profileRouter.get('/getProfilePercentage', isAuthenticated, getProfilePercentage)
 profileRouter.get('/filtered-profiles', isAuthenticated, getFilteredProfile);
-profileRouter.put('/contact-details', isAuthenticated, contactDetails)
+profileRouter.put('/contact', isAuthenticated, contactDetails)
 
 
 
