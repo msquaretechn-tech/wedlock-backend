@@ -9,7 +9,7 @@ import Answer from "../Models/answer.model.js";
 import User from "../Models/user.js";
 import dotenv from "dotenv";
 import connection from "../Models/connection.model.js";
-import { Op, where,Sequelize } from "sequelize";
+import { Op, where, Sequelize } from "sequelize";
 import errorhandler from "../Utils/errorhandler.js";
 import { catchAsyncError } from "../Middlewares/catchAsyncError.js";
 import { uploadCloudinary } from "../Utils/cloudinary.js";
@@ -17,9 +17,9 @@ import recommendation from "../Models/recommendation.model.js";
 import ToggleSection from "../Models/toggleSection.model.js";
 import { redis } from "../Utils/redis.js";
 import axios from "axios";
-import moment from 'moment';  
+import moment from 'moment';
 import Block from "../Models/block.model.js"
-import { parseHeight,parseIncome } from "../Utils/helper.js";
+import { parseHeight, parseIncome } from "../Utils/helper.js";
 
 
 
@@ -164,8 +164,7 @@ export const getuserImage = catchAsyncError(async (req, res, next) => {
 export const updatePersonalDetails = catchAsyncError(async (req, res, next) => {
   const userId = req.user.userId;
 
-  const { firstName, lastName, displayName, maritalStatus, aboutYourSelf } =
-    req.body;
+  const { firstName, lastName, displayName, maritalStatus, aboutYourSelf } = req.body;
 
   const personalData = await personalDetails.findOne({ where: { userId } });
 
@@ -188,6 +187,30 @@ export const updatePersonalDetails = catchAsyncError(async (req, res, next) => {
     message: "Personal details updated successfully",
   });
 });
+
+
+export const contactDetails = catchAsyncError(async (req, res, next) => {
+  const userId = req.user.userId;
+
+  const { phone, email } = req.body;
+
+  const personalData = await personalDetails.findOne({ where: { userId } });
+
+  if (!personalData) {
+    return next(new errorhandler("Personal details not found!", 400));
+  }
+
+  await personalDetails.update(
+    { phone },
+    { where: { userId } }
+  );
+
+  res.status(201).json({
+    success: true,
+    message: "Contact details updated successfully",
+  });
+});
+
 
 export const updateFamilyDetails = catchAsyncError(async (req, res, next) => {
   const userId = req.user.userId;
@@ -444,41 +467,41 @@ export const updateInterstAndHobbies = catchAsyncError(
   }
 );
 export const UpdatephotoUpload = catchAsyncError(async (req, res, next) => {
-  try{ 
+  try {
     const userId = req.user.userId;
 
 
-        if (!req.files) {
-            return next(new errorhandler("Please upload an image!", 400));
-        }
-    
-    
-        let userImageUrls;
-    
-        if (req.files && req.files.length > 0) {
-            const userImagesLocal = req.files.map((file) => file.path);
-    
-            const userImages = await uploadCloudinary(userImagesLocal);
-    
-            userImageUrls = Array.isArray(userImages) ? userImages.map((image) => image.url)
-                : [userImages.url];
-        }
-    
-        const imageUploadData = await imageUpload.update({ image: userImageUrls},{ where: { userId } });
+    if (!req.files) {
+      return next(new errorhandler("Please upload an image!", 400));
+    }
 
-    
-           await recommendation.update({image: userImageUrls}, { where: { userId } });
-    
-           await User.update({isImageFormFilled: true}, { where: { userId } });
-    
-          res.status(201).json({
-            success: true,
-            message: "Image uploaded successfully",
-        })
-  }catch(error){
+
+    let userImageUrls;
+
+    if (req.files && req.files.length > 0) {
+      const userImagesLocal = req.files.map((file) => file.path);
+
+      const userImages = await uploadCloudinary(userImagesLocal);
+
+      userImageUrls = Array.isArray(userImages) ? userImages.map((image) => image.url)
+        : [userImages.url];
+    }
+
+    const imageUploadData = await imageUpload.update({ image: userImageUrls }, { where: { userId } });
+
+
+    await recommendation.update({ image: userImageUrls }, { where: { userId } });
+
+    await User.update({ isImageFormFilled: true }, { where: { userId } });
+
+    res.status(201).json({
+      success: true,
+      message: "Image uploaded successfully",
+    })
+  } catch (error) {
     return next(new errorhandler(error.message, 500));
   }
-  
+
 })
 
 // export const MatchedProfiles = catchAsyncError(async (req, res, next) => {
@@ -536,15 +559,15 @@ export const MatchedProfiles = catchAsyncError(async (req, res, next) => {
 
     console.log("Blocked User IDs:", blockedUserIds);
 
-   
+
     const response = await axios.get(`${process.env.RECC_BASE_URL}/get_matches/`, {
       params: {
         userId,
         ...req.query
       },
       headers: {
-           'x-api-key': process.env.RECC_API_KEY
-     }
+        'x-api-key': process.env.RECC_API_KEY
+      }
     });
 
     const rawProfiles = response.data.profiles || [];
@@ -875,7 +898,7 @@ export const filterProfiles = catchAsyncError(async (req, res, next) => {
       maritalStatus,
       eatingHabbits,
 
-    } = req.query; 
+    } = req.query;
 
     const currentUser = await recommendation.findOne({ where: { userId } });
     const lookingFor = currentUser?.lookingFor;
