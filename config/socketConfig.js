@@ -8,7 +8,7 @@ let io;
 export const intializeSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: ["https://wedlock.au", "https://admin.wedlock.au", 'http://localhost:5173', 'http://localhost:5176'],
+            origin: ["https://wedlock.com.au", "https://admin.wedlock.com.au", 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'],
             methods: ["GET", "POST"],
         },
     });
