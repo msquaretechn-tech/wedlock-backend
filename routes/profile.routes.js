@@ -1,6 +1,6 @@
 import express from "express";
 import { isAuthenticated } from '../Middlewares/auth.js';
-import { myDetails, updatePersonalDetails, updateFamilyDetails, updatePersonalBackground, updateReligiousBackground, updateLocationDetails, updateEducationAndFinancialDetails, MatchedProfiles, UserDetails, filterFieldCount, updateInterstAndHobbies, UpdatephotoUpload, adminProfileImage, matrimonialProfiles, getuserImage, allProfiles, getProfilePercentage, discoverProfiles, getFilteredProfile, contactDetails } from '../Controllers/profile.controller.js'
+import { myDetails, updatePersonalDetails, updateFamilyDetails, updatePersonalBackground, updateReligiousBackground, updateLocationDetails, updateEducationAndFinancialDetails, MatchedProfiles, UserDetails, filterFieldCount, updateInterstAndHobbies, UpdatephotoUpload, adminProfileImage, matrimonialProfiles, getuserImage, allProfiles, getProfilePercentage, discoverProfiles, getFilteredProfile } from '../Controllers/profile.controller.js'
 import { upload } from "../Middlewares/multer.js";
 
 
