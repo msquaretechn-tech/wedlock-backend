@@ -1,4 +1,5 @@
 import Contact from "../Models/contact.model.js";
+import { catchAsyncError } from "../Middlewares/catchAsyncError.js";
 
 export const createContact = async (req, res) => {
   try {
