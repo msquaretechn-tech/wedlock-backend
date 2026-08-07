@@ -18,8 +18,6 @@ export function generateZegoToken(appId, serverSecret, userId, effectiveTimeInSe
     const numericAppId = Number(appId);
     const strUserId = String(userId);
 
-    // test
-
     const ctime = Math.floor(Date.now() / 1000);
     const expire = ctime + effectiveTimeInSeconds;
 
