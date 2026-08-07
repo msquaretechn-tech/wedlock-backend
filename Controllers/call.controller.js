@@ -94,6 +94,11 @@ export const getZegoToken = catchAsyncError(async (req, res, next) => {
         const appId = process.env.ZEGO_APP_ID || 1202014598;
         const serverSecret = process.env.ZEGO_SERVER_SECRET;
 
+        console.log("[ZegoToken] Generating token for userId:", userId);
+        console.log("[ZegoToken] ZEGO_APP_ID:", appId);
+        console.log("[ZegoToken] ZEGO_SERVER_SECRET exists:", !!serverSecret);
+        console.log("[ZegoToken] ZEGO_SERVER_SECRET length:", serverSecret ? serverSecret.length : 0);
+
         if (!serverSecret) {
             return next(new errorhandler("ZEGO_SERVER_SECRET is not configured in .env", 500));
         }
@@ -116,6 +121,7 @@ export const getZegoToken = catchAsyncError(async (req, res, next) => {
             message: "Zego token generated successfully!"
         });
     } catch (error) {
+        console.error("[ZegoToken] Error:", error.message);
         return next(new errorhandler(error.message, 500));
     }
 });
