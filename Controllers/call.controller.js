@@ -109,7 +109,7 @@ export const getZegoToken = catchAsyncError(async (req, res, next) => {
             serverSecret,
             userId,
             validTime,
-            JSON.stringify({ room_id: roomID || `room_${userId}` })
+            ""
         );
 
         return res.status(200).json({
