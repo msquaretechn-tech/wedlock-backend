@@ -46,7 +46,39 @@ export const intializeSocket = (server) => {
             io.emit("sendFriendRequest", data);
         });
 
-       
+        // Real-time Zego Calling events
+        socket.on("zego_call_user", (data) => {
+            const { targetUserId, roomID, callType, callerInfo } = data;
+            io.to(targetUserId).emit("zego_incoming_call", {
+                callerId: socket.data.userId,
+                callerInfo,
+                roomID,
+                callType
+            });
+        });
+
+        socket.on("zego_accept_call", (data) => {
+            const { callerId, roomID } = data;
+            io.to(callerId).emit("zego_call_accepted", {
+                acceptorId: socket.data.userId,
+                roomID
+            });
+        });
+
+        socket.on("zego_reject_call", (data) => {
+            const { callerId, reason } = data;
+            io.to(callerId).emit("zego_call_rejected", {
+                rejectorId: socket.data.userId,
+                reason: reason || "User rejected the call"
+            });
+        });
+
+        socket.on("zego_end_call", (data) => {
+            const { targetUserId } = data;
+            io.to(targetUserId).emit("zego_call_ended", {
+                endedBy: socket.data.userId
+            });
+        });
 
         socket.on("disconnect", () => {
             console.log(`User disconnected: ${socket.data.userId}`);

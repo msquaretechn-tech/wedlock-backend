@@ -76,10 +76,47 @@ export const getCallDuration = catchAsyncError(async (req, res, next) => {
             return res.status(404).json({ success: false, message: "callDuration remainig not found!" });
         }
 
+
         res.status(200).json({ success: true, data:callDuration });
 
     } catch (error) {
         return next(new errorhandler(error.message, 500));
     }
-}
-);
+});
+
+import { generateZegoToken } from "../Utils/zegoToken.js";
+
+export const getZegoToken = catchAsyncError(async (req, res, next) => {
+    try {
+        const userId = req.user.userId;
+        const { roomID, effectiveTime } = req.body;
+
+        const appId = process.env.ZEGO_APP_ID || 1202014598;
+        const serverSecret = process.env.ZEGO_SERVER_SECRET;
+
+        if (!serverSecret) {
+            return next(new errorhandler("ZEGO_SERVER_SECRET is not configured in .env", 500));
+        }
+
+        const validTime = effectiveTime ? Number(effectiveTime) : 3600;
+        const kitToken = generateZegoToken(
+            Number(appId),
+            serverSecret,
+            userId,
+            validTime,
+            JSON.stringify({ room_id: roomID || `room_${userId}` })
+        );
+
+        return res.status(200).json({
+            success: true,
+            appID: Number(appId),
+            userID: userId,
+            roomID: roomID || `room_${userId}`,
+            kitToken: kitToken,
+            message: "Zego token generated successfully!"
+        });
+    } catch (error) {
+        return next(new errorhandler(error.message, 500));
+    }
+});
+
