@@ -10,6 +10,8 @@ console.log({
     HOST: process.env.HOST || "postgres"
 });
 
+//
+
 const connectDB = () => {
     const sequelize = new Sequelize(
         process.env.DATABASE,
