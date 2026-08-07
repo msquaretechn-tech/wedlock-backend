@@ -88,13 +88,13 @@ import { generateZegoToken } from "../Utils/zegoToken.js";
 
 export const getZegoToken = catchAsyncError(async (req, res, next) => {
     try {
-        const userId = req.user.userId;
+        const targetUserId = req.body.userID || req.body.userId || req.user.uid || req.user.userId;
         const { roomID, effectiveTime } = req.body;
 
         const appId = process.env.ZEGO_APP_ID || 1202014598;
         const serverSecret = process.env.ZEGO_SERVER_SECRET;
 
-        console.log("[ZegoToken] Generating token for userId:", userId);
+        console.log("[ZegoToken] Generating token for userId:", targetUserId);
         console.log("[ZegoToken] ZEGO_APP_ID:", appId);
         console.log("[ZegoToken] ZEGO_SERVER_SECRET exists:", !!serverSecret);
         console.log("[ZegoToken] ZEGO_SERVER_SECRET length:", serverSecret ? serverSecret.length : 0);
@@ -107,7 +107,7 @@ export const getZegoToken = catchAsyncError(async (req, res, next) => {
         const kitToken = generateZegoToken(
             Number(appId),
             serverSecret,
-            userId,
+            targetUserId,
             validTime,
             ""
         );
@@ -115,8 +115,8 @@ export const getZegoToken = catchAsyncError(async (req, res, next) => {
         return res.status(200).json({
             success: true,
             appID: Number(appId),
-            userID: userId,
-            roomID: roomID || `room_${userId}`,
+            userID: targetUserId,
+            roomID: roomID || `room_${targetUserId}`,
             kitToken: kitToken,
             message: "Zego token generated successfully!"
         });
