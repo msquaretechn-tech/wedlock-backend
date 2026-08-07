@@ -88,7 +88,8 @@ import { generateZegoToken } from "../Utils/zegoToken.js";
 
 export const getZegoToken = catchAsyncError(async (req, res, next) => {
     try {
-        const targetUserId = req.body.userID || req.body.userId || req.user.uid || req.user.userId;
+        const rawUserId = req.body.userID || req.body.userId || req.user.uid || req.user.userId || req.user._id || req.user.id;
+        const targetUserId = String(rawUserId).replace(/-/g, '').slice(0, 32);
         const { roomID, effectiveTime } = req.body;
 
         const appId = process.env.ZEGO_APP_ID || 1202014598;
