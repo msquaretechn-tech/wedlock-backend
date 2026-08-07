@@ -18,12 +18,14 @@ export function generateZegoToken(appId, serverSecret, userId, effectiveTimeInSe
     const numericAppId = Number(appId);
     const strUserId = String(userId);
 
+    // test
+
     const ctime = Math.floor(Date.now() / 1000);
     const expire = ctime + effectiveTimeInSeconds;
-    
+
     // Generate random 8-byte nonce
     const nonce = crypto.randomBytes(8);
-    
+
     // Buffers for userId and payload
     const userIdBuffer = Buffer.from(strUserId, 'utf8');
     const payloadStr = typeof payload === 'string' ? payload : JSON.stringify(payload || '');
