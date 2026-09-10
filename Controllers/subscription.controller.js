@@ -2,6 +2,7 @@ import { catchAsyncError } from "../Middlewares/catchAsyncError.js";
 import errorhandler from "../Utils/errorhandler.js";
 import subscription from "../Models/subscription.model.js";
 import User from '../Models/user.js'
+import personalDetails from "../Models/personalDetails.model.js";
 import Recommendation from "../Models/recommendation.model.js";
 import { v4 as uuidv4 } from "uuid";
 import plan from "../Models/plan.model.js";
@@ -11,6 +12,8 @@ import moment from 'moment';
 import { Op } from "sequelize";
 import paypalClient from "../config/paypal.js";
 import paypal from "@paypal/checkout-server-sdk";
+import sendEmail from "../Utils/sendMail.js";
+import { validateExclusiveEligibility, EXCLUSIVE_CRITERIA_LIST } from "../Utils/exclusiveCriteria.js";
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -37,6 +40,19 @@ export const createCheckoutSession = catchAsyncError(
 
         if (!planData) {
             return next(new errorhandler("Plan not found", 404));
+        }
+
+        // Validate Exclusive plan criteria
+        if (planData.planName === "Exclusive") {
+            const eligibility = await validateExclusiveEligibility(userId, req.body);
+            if (!eligibility.isEligible) {
+                return res.status(400).json({
+                    success: false,
+                    message: "You are not eligible to purchase the Exclusive plan.",
+                    unmatchedCriteria: eligibility.unmatchedCriteria,
+                    details: eligibility.details
+                });
+            }
         }
 
         try {
@@ -186,6 +202,19 @@ export const handlePaymentProcessForMobile = catchAsyncError(async (req, res, ne
             return next(new errorhandler("Plan not found!", 404));
         }
 
+        // Validate Exclusive plan criteria
+        if (planData.planName === "Exclusive") {
+            const eligibility = await validateExclusiveEligibility(userId, req.body);
+            if (!eligibility.isEligible) {
+                return res.status(400).json({
+                    success: false,
+                    message: "You are not eligible to purchase the Exclusive plan.",
+                    unmatchedCriteria: eligibility.unmatchedCriteria,
+                    details: eligibility.details
+                });
+            }
+        }
+
         const endDate = moment().add(planData.durationInMonths, 'months').toDate();
 
         const orderId = `WDL${uuidv4().split('-')[0].toUpperCase()}`;
@@ -218,29 +247,107 @@ export const handlePaymentProcessForMobile = catchAsyncError(async (req, res, ne
         return next(new errorhandler(error.message, 500));
     }
 })
-export const handleAutoExpiry = catchAsyncError(async (req, res, next) => {
+
+// Check exclusive plan eligibility for logged-in user
+export const checkExclusiveEligibility = catchAsyncError(async (req, res, next) => {
     try {
-        const subscriptionData = await subscription.findAll();
+        const userId = req.user.userId;
+        const payload = { ...(req.query || {}), ...(req.body || {}) };
+        const result = await validateExclusiveEligibility(userId, payload);
 
-        if (!subscriptionData) {
-            return next(new errorhandler("Subscription not found!", 404));
-        }
-
+        return res.status(200).json({
+            success: true,
+            isEligible: result.isEligible,
+            unmatchedCriteria: result.unmatchedCriteria,
+            details: result.details,
+            allCriteria: EXCLUSIVE_CRITERIA_LIST
+        });
+    } catch (error) {
+        return next(new errorhandler(error.message, 500));
+    }
+});
+export const processSubscriptionExpiry = async () => {
+    try {
+        console.log("----- Starting Subscription Expiry Check -----");
         const today = new Date();
 
-        subscriptionData.forEach(async (subscription) => {
-            if (subscription.endDate && subscription.endDate < today) {
-                await subscription.update({ status: 'Expired' });
-                await User.update({ usertype: 'Standard' }, { where: { userId: subscription.userId } });
+        const expiredSubscriptions = await subscription.findAll({
+            where: {
+                endDate: { [Op.lt]: today },
+                status: { [Op.ne]: 'Expired' }
             }
         });
 
-        console.log("Subscription updated successfully!");
-    } catch (error) {
-        console.error("Error updating subscriptions:", error.message);
-    }
+        console.log(`Found ${expiredSubscriptions.length} subscriptions to expire.`);
 
-})
+        let processedCount = 0;
+
+        for (const sub of expiredSubscriptions) {
+            try {
+                // 1. Status update karo
+                await sub.update({ status: 'Expired' });
+                await User.update({ usertype: 'Standard' }, { where: { userId: sub.userId } });
+                await Recommendation.update({ usertype: 'Standard' }, { where: { userId: sub.userId } });
+
+                // 2. User data fetch karo
+                const user = await User.findOne({ where: { userId: sub.userId } });
+                const personalDetail = await personalDetails.findOne({ where: { userId: sub.userId } });
+                const planData = await plan.findOne({ where: { planId: sub.planId } });
+
+                const userName = personalDetail
+                    ? `${personalDetail.firstName || ''} ${personalDetail.lastName || ''}`.trim() || 'User'
+                    : 'User';
+
+                // 3. Email bhejo
+                if (user && user.email) {
+                    try {
+                        await sendEmail({
+                            email: user.email,
+                            subject: "Your Wedlock Subscription Has Expired",
+                            template: "subscription-expiry.ejs",
+                            data: {
+                                name: userName,
+                                planName: planData?.planName || "Premium",
+                                expiryDate: moment(sub.endDate).format('DD MMMM YYYY'),
+                            }
+                        });
+                        console.log(`Expiry email sent successfully to ${user.email}`);
+                    } catch (emailError) {
+                        console.error(`Failed to send expiry email to ${user.email}:`, emailError.message);
+                    }
+                }
+
+                processedCount++;
+            } catch (subError) {
+                console.error(`Error processing subscription ID ${sub.id}:`, subError.message);
+            }
+        }
+
+        console.log(`----- Finished Subscription Expiry Check. Processed: ${processedCount} -----`);
+        return { totalFound: expiredSubscriptions.length, processed: processedCount };
+    } catch (error) {
+        console.error("Error running subscription expiry:", error.message);
+        throw error;
+    }
+};
+
+export const handleAutoExpiry = catchAsyncError(async (req, res, next) => {
+    try {
+        const result = await processSubscriptionExpiry();
+
+        if (res) {
+            return res.status(200).json({
+                success: true,
+                message: `Subscription expiry check completed. ${result.processed} subscription(s) processed.`,
+                data: result
+            });
+        }
+    } catch (error) {
+        if (res && next) {
+            return next(new errorhandler(error.message, 500));
+        }
+    }
+});
 export const getSubscriptionPurchaseHistory = catchAsyncError(async (req, res, next) => {
 
     try {
@@ -280,7 +387,7 @@ export const getSubscriptionPurchaseHistory = catchAsyncError(async (req, res, n
 });
 cron.schedule('0 0 * * *', async () => {
     console.log('Running subscription expiry check at midnight...');
-    handleAutoExpiry();
+    await processSubscriptionExpiry();
 });
 
 

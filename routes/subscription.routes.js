@@ -1,6 +1,6 @@
 import express from "express";
 import { isAuthenticated } from "../Middlewares/auth.js";
-import { createCheckoutSession, getSubscriptionPurchaseHistory, handlePaymentProcessForMobile, checkSubscriptionStatus } from "../Controllers/subscription.controller.js";
+import { createCheckoutSession, getSubscriptionPurchaseHistory, handlePaymentProcessForMobile, checkSubscriptionStatus, handleAutoExpiry, checkExclusiveEligibility } from "../Controllers/subscription.controller.js";
 
 const subscriptionRouter = express.Router();
 
@@ -12,5 +12,8 @@ subscriptionRouter.post('/createCheckoutSession', isAuthenticated, createCheckou
 subscriptionRouter.get('/checkSubscriptionStatus', isAuthenticated, checkSubscriptionStatus)
 subscriptionRouter.get('/getSubscriptionHistory', isAuthenticated, getSubscriptionPurchaseHistory)
 subscriptionRouter.post('/handlePaymentProcessForMobile', isAuthenticated, handlePaymentProcessForMobile)
+subscriptionRouter.get('/triggerAutoExpiry', handleAutoExpiry)
+subscriptionRouter.get('/checkExclusiveEligibility', isAuthenticated, checkExclusiveEligibility)
+subscriptionRouter.post('/checkExclusiveEligibility', isAuthenticated, checkExclusiveEligibility)
 
 export default subscriptionRouter

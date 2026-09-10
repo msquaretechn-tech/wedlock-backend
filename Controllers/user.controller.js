@@ -334,7 +334,7 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
         //     role: user.role,
         //     isVerified: user.isVerified
         // }
-        sendToken(user, 200, res, "Login successfull!");
+        sendToken(user, 200, res, "Login successful!");
     } catch (error) {
         return next(new errorhandler(error.message, 500));
     }
@@ -931,21 +931,21 @@ export const checkUserSuspensionStatus = catchAsyncError(async (req, res, next) 
     const suspensionRecord = await SuspendedUser.findOne({
         where: { userId },
         include: [
-          {
-            model: User,
-            attributes: ['userId', 'email', 'usertype', 'role'],
-            include: [
-              {
-                model: imageUpload,
-                attributes: ['image'],
-                as: 'imageUpload' // removed limit
-              }
-            ]
-          },
-          {
-            model: personalDetails,
-            attributes: ['firstName', 'lastName', 'displayName', 'aboutYourSelf']
-          }
+            {
+                model: User,
+                attributes: ['userId', 'email', 'usertype', 'role'],
+                include: [
+                    {
+                        model: imageUpload,
+                        attributes: ['image'],
+                        as: 'imageUpload' // removed limit
+                    }
+                ]
+            },
+            {
+                model: personalDetails,
+                attributes: ['firstName', 'lastName', 'displayName', 'aboutYourSelf']
+            }
         ]
     });
 

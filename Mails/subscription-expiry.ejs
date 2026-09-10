@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedlock - Subscription Expired</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; background-color: #EEF2FF; margin: 0; padding: 20px; color: #1F2937;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+        style="max-width: 600px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+        <!-- Header -->
+        <tr>
+            <td style="background: #2563EB; color: white; padding: 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td style="font-size: 24px; font-weight: bold;">Wedlock</td>
+                        <td style="font-size: 14px; opacity: 0.85; text-align: right;">Subscription Notice</td>
+                    </tr>
+                </table>
+                <div style="font-size: 18px; opacity: 0.95; margin-top: 12px;">Hello <%= name %>,</div>
+                <div style="font-size: 20px; font-weight: 600; margin-top: 8px;">Your Subscription Has Expired</div>
+            </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+            <td style="padding: 24px;">
+                <p style="font-size: 15px; line-height: 1.6; color: #4B5563; margin-top: 0;">
+                    We wanted to inform you that your <strong><%= planName %></strong> subscription expired on <strong><%= expiryDate %></strong>. Your account has now been transitioned to the <strong>Standard</strong> plan.
+                </p>
+
+                <!-- Plan Summary Card -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                    style="background: #F9FAFB; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                    <tr>
+                        <td style="font-size: 16px; font-weight: 600; color: #1F2937; padding-bottom: 12px;">
+                            Subscription Details
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="color: #6B7280; padding: 6px 0;">Previous Plan:</td>
+                                    <td style="font-weight: 600; text-align: right; color: #1F2937;"><%= planName %></td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #6B7280; padding: 6px 0;">Expiry Date:</td>
+                                    <td style="font-weight: 600; text-align: right; color: #DC2626;"><%= expiryDate %></td>
+                                </tr>
+                                <tr>
+                                    <td style="color: #6B7280; padding: 6px 0;">Current Status:</td>
+                                    <td style="font-weight: 600; text-align: right; color: #6B7280;">Standard (Free)</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <p style="font-size: 15px; line-height: 1.6; color: #4B5563;">
+                    Don't let your journey to finding your soulmate stop! Renew your subscription today to restore full access to:
+                </p>
+
+                <ul style="list-style: none; padding: 0; margin: 16px 0; color: #4B5563; font-size: 14px;">
+                    <li style="margin-bottom: 8px;"><span style="color: #2563EB; margin-right: 8px;">★</span> Unlimited direct messaging & connections</li>
+                    <li style="margin-bottom: 8px;"><span style="color: #2563EB; margin-right: 8px;">★</span> View verified phone numbers & contact info</li>
+                    <li style="margin-bottom: 8px;"><span style="color: #2563EB; margin-right: 8px;">★</span> Priority profile ranking in searches</li>
+                </ul>
+
+                <!-- CTA Button -->
+                <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 28px auto;">
+                    <tr>
+                        <td align="center" style="background: #2563EB; border-radius: 8px; padding: 12px 28px;">
+                            <a href="https://www.wedlock.com.au/plans"
+                                style="color: #FFFFFF; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">
+                                Renew Subscription Now
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Action links -->
+                <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td align="center">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: auto;">
+                                <tr>
+                                    <td style="padding: 8px;">
+                                        <a href="https://www.wedlock.com.au/contact-us"
+                                            style="display: inline-flex; align-items: center; color: #2563EB; text-decoration: none; font-weight: 500; font-size: 14px;">
+                                            <span style="margin-right: 4px;">✉️</span>
+                                            Contact Support
+                                        </a>
+                                    </td>
+                                    <td style="padding: 8px;">
+                                        <a href="https://www.wedlock.com.au/user-dashboard"
+                                            style="display: inline-flex; align-items: center; color: #2563EB; text-decoration: none; font-weight: 500; font-size: 14px;">
+                                            <span style="margin-right: 4px;">📊</span>
+                                            View Dashboard
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Footer -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                    style="text-align: center; padding-top: 24px; margin-top: 32px; border-top: 1px solid #E5E7EB; color: #9CA3AF; font-size: 13px;">
+                    <tr>
+                        <td>
+                            <p style="margin: 4px 0;">Thank you for being a part of the Wedlock community.</p>
+                            <p style="margin: 4px 0;">© 2025 Wedlock. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>
