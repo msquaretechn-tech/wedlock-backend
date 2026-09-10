@@ -26,7 +26,8 @@ jobs:
             cd ~/wedlock-backend
 
             echo "Pulling latest Code" 
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
 
             echo "Detecting currently running deployment color..."
             CURRENT_RUNNING=\$(docker ps --filter "name=backend-green" --filter "status=running" --format "{{.Names}}")
