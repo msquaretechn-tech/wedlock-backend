@@ -160,24 +160,31 @@ export async function validateExclusiveEligibility(userId, payload = {}) {
     const minRequiredAge = isFemale ? 18 : 21;
 
     let userAge = null;
-    if (other?.dateOfBirth) {
+    const dobStr = (other?.dateOfBirth && other.dateOfBirth !== "0") ? other.dateOfBirth : rec?.dateOfBirth;
+
+    if (dobStr && dobStr !== "0") {
         const dob = moment(
-            other.dateOfBirth,
+            dobStr,
             ["YYYY-MM-DD", "DD-MM-YYYY", "DD/MM/YYYY", "MM/DD/YYYY", moment.ISO_8601],
             true
         );
         if (dob.isValid()) {
-            userAge = moment().diff(dob, "years");
+            const calculatedAge = moment().diff(dob, "years");
+            if (calculatedAge > 0) userAge = calculatedAge;
         } else {
-            const fallbackDob = moment(other.dateOfBirth);
+            const fallbackDob = moment(dobStr);
             if (fallbackDob.isValid()) {
-                userAge = moment().diff(fallbackDob, "years");
+                const calculatedAge = moment().diff(fallbackDob, "years");
+                if (calculatedAge > 0) userAge = calculatedAge;
             }
         }
     }
+
     if (userAge === null && rec?.age) {
         const parsed = parseInt(rec.age);
-        if (!isNaN(parsed)) userAge = parsed;
+        if (!isNaN(parsed) && parsed > 0) {
+            userAge = parsed;
+        }
     }
 
     let ageSatisfied = false;
