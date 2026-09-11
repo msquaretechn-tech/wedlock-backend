@@ -49,10 +49,10 @@ export const EXCLUSIVE_CRITERIA_LIST = [
 /**
  * Parse income string and determine if it meets minimum $100,000+
  */
-export function isIncomeEligible(incomeStr) {
-    if (!incomeStr || typeof incomeStr !== "string") return false;
+export function isIncomeEligible(incomeVal) {
+    if (incomeVal === null || incomeVal === undefined) return false;
 
-    const normalized = incomeStr.toLowerCase().replace(/au\$|\$|,/g, "").trim();
+    const normalized = String(incomeVal).toLowerCase().replace(/au\$|\$|,/g, "").trim();
 
     // Support "100k", "150k+", etc.
     if (/(1\d{2}|[2-9]\d{2}|\d{4,})k/i.test(normalized)) return true;
@@ -79,10 +79,10 @@ export function isIncomeEligible(incomeStr) {
 /**
  * Determine if qualification is graduate degree or higher
  */
-export function isQualificationEligible(qualStr) {
-    if (!qualStr || typeof qualStr !== "string") return false;
+export function isQualificationEligible(qualVal) {
+    if (qualVal === null || qualVal === undefined) return false;
 
-    const q = qualStr.toLowerCase().trim();
+    const q = String(qualVal).toLowerCase().trim();
 
     // Below graduate patterns
     const belowGraduatePattern =
@@ -103,6 +103,7 @@ export async function validateExclusiveEligibility(userId, payload = {}) {
     if (!user) {
         return {
             isEligible: false,
+            message: "User profile not found.",
             unmatchedCriteria: ["User profile not found."],
             details: [],
         };
@@ -121,6 +122,7 @@ export async function validateExclusiveEligibility(userId, payload = {}) {
 
         return {
             isEligible: false,
+            message: msg,
             unmatchedCriteria: [msg],
             details: [
                 {
@@ -427,9 +429,13 @@ export async function validateExclusiveEligibility(userId, payload = {}) {
     if (!verifSatisfied) unmatchedCriteria.push(verifMessage);
 
     const isEligible = unmatchedCriteria.length === 0;
+    const message = isEligible
+        ? "You are eligible to purchase the Exclusive plan."
+        : (unmatchedCriteria.length === 1 ? unmatchedCriteria[0] : unmatchedCriteria.join(" "));
 
     return {
         isEligible,
+        message,
         unmatchedCriteria,
         details,
     };

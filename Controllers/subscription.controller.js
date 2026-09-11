@@ -46,9 +46,13 @@ export const createCheckoutSession = catchAsyncError(
         if (planData.planName === "Exclusive") {
             const eligibility = await validateExclusiveEligibility(userId, req.body);
             if (!eligibility.isEligible) {
+                const message = eligibility.message || (eligibility.unmatchedCriteria?.length > 0
+                    ? eligibility.unmatchedCriteria.join(" ")
+                    : "You are not eligible to purchase the Exclusive plan.");
+
                 return res.status(400).json({
                     success: false,
-                    message: "You are not eligible to purchase the Exclusive plan.",
+                    message,
                     unmatchedCriteria: eligibility.unmatchedCriteria,
                     details: eligibility.details
                 });
@@ -206,9 +210,13 @@ export const handlePaymentProcessForMobile = catchAsyncError(async (req, res, ne
         if (planData.planName === "Exclusive") {
             const eligibility = await validateExclusiveEligibility(userId, req.body);
             if (!eligibility.isEligible) {
+                const message = eligibility.message || (eligibility.unmatchedCriteria?.length > 0
+                    ? eligibility.unmatchedCriteria.join(" ")
+                    : "You are not eligible to purchase the Exclusive plan.");
+
                 return res.status(400).json({
                     success: false,
-                    message: "You are not eligible to purchase the Exclusive plan.",
+                    message,
                     unmatchedCriteria: eligibility.unmatchedCriteria,
                     details: eligibility.details
                 });
@@ -258,6 +266,7 @@ export const checkExclusiveEligibility = catchAsyncError(async (req, res, next) 
         return res.status(200).json({
             success: true,
             isEligible: result.isEligible,
+            message: result.message,
             unmatchedCriteria: result.unmatchedCriteria,
             details: result.details,
             allCriteria: EXCLUSIVE_CRITERIA_LIST
