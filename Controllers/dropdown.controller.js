@@ -400,12 +400,17 @@ export const fatherOccupationDropdown = catchAsyncError(async (req, res, next) =
             return next(new errorhandler("Dropdown data not found!", 404));
         }
 
-        const data = dropdownData.map((dropdown) => {
-            return {
-                id: dropdown.id,
-                value: dropdown.dropdownValue,
-            };
-        });
+        const data = dropdownData
+            .map((dropdown) => {
+                return {
+                    id: dropdown.id,
+                    value: dropdown.dropdownValue,
+                };
+            })
+            .filter((item) => {
+                const val = String(item.value).toLowerCase().trim();
+                return !val.includes("frequently") && val !== "other" && val !== "others";
+            });
 
         res.status(200).json({
             success: true,
@@ -442,12 +447,17 @@ export const motherOccupationDropdown = catchAsyncError(async (req, res, next) =
             return next(new errorhandler("Dropdown data not found!", 404));
         }
 
-        const data = dropdownData.map((dropdown) => {
-            return {
-                id: dropdown.id,
-                value: dropdown.dropdownValue,
-            };
-        });
+        const data = dropdownData
+            .map((dropdown) => {
+                return {
+                    id: dropdown.id,
+                    value: dropdown.dropdownValue,
+                };
+            })
+            .filter((item) => {
+                const val = String(item.value).toLowerCase().trim();
+                return !val.includes("frequently") && val !== "other" && val !== "others";
+            });
 
         res.status(200).json({
             success: true,
@@ -738,12 +748,17 @@ export const occupationDropdown = catchAsyncError(async (req, res, next) => {
             return next(new errorhandler("Dropdown data not found!", 404));
         }
 
-        const data = dropdownData.map((dropdown) => {
-            return {
-                id: dropdown.id,
-                value: dropdown.dropdownValue,
-            };
-        });
+        const data = dropdownData
+            .map((dropdown) => {
+                return {
+                    id: dropdown.id,
+                    value: dropdown.dropdownValue,
+                };
+            })
+            .filter((item) => {
+                const val = String(item.value).toLowerCase().trim();
+                return !val.includes("frequently") && val !== "other" && val !== "others";
+            });
 
         res.status(200).json({
             success: true,
