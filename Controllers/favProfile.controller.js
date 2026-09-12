@@ -29,7 +29,7 @@ export const toggleFav = catchAsyncError(async (req, res, next) => {
         await FavProfile.create({ favoritedUserId, userId });
 
 
-        return res.status(201).json({ success: true, message: "Favourite Added successfully!" });
+        return res.status(201).json({ success: true, message: "Favourite added successfully!" });
 
     } catch (error) {
 
