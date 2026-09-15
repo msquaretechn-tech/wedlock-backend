@@ -100,7 +100,7 @@ export const handlePaymentSuccess = catchAsyncError(async (req, res, next) => {
     
             }
     
-            await sendEmail({ email, subject: `Your Wedlock.au order #${orderId}`, template: "order-mail.ejs", data });
+            await sendEmail({ email, subject: `Your Wedlock.com.au order #${orderId}`, template: "order-mail.ejs", data });
     
     
             res.status(201).json({

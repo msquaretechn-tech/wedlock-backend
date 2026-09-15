@@ -409,7 +409,7 @@ export const fatherOccupationDropdown = catchAsyncError(async (req, res, next) =
             })
             .filter((item) => {
                 const val = String(item.value).toLowerCase().trim();
-                return !val.includes("frequently") && val !== "other" && val !== "others";
+                return !val.includes("frequently") && val !== "other" && val !== "others" && !val.includes("ias") && !val.includes("irs") && !val.includes("ies") && !val.includes("ifs");
             });
 
         res.status(200).json({
@@ -456,7 +456,7 @@ export const motherOccupationDropdown = catchAsyncError(async (req, res, next) =
             })
             .filter((item) => {
                 const val = String(item.value).toLowerCase().trim();
-                return !val.includes("frequently") && val !== "other" && val !== "others";
+                return !val.includes("frequently") && val !== "other" && val !== "others" && !val.includes("ias") && !val.includes("irs") && !val.includes("ies") && !val.includes("ifs");
             });
 
         res.status(200).json({
@@ -757,7 +757,7 @@ export const occupationDropdown = catchAsyncError(async (req, res, next) => {
             })
             .filter((item) => {
                 const val = String(item.value).toLowerCase().trim();
-                return !val.includes("frequently") && val !== "other" && val !== "others";
+                return !val.includes("frequently") && val !== "other" && val !== "others" && !val.includes("ias") && !val.includes("irs") && !val.includes("ies") && !val.includes("ifs");
             });
 
         res.status(200).json({
