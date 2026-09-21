@@ -11,11 +11,33 @@ const __dirname = path.dirname(__filename);
 
 const serviceAccountPath = path.join(__dirname, "../config/serviceAccountKey.json");
 
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
+let serviceAccount;
 
-export const firebaseAdmin = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-});
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+        serviceAccount = typeof process.env.FIREBASE_SERVICE_ACCOUNT === 'string'
+            ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+            : process.env.FIREBASE_SERVICE_ACCOUNT;
+    } catch (e) {
+        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT env var:", e.message);
+    }
+}
+
+if (!serviceAccount && fs.existsSync(serviceAccountPath)) {
+    try {
+        serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
+    } catch (e) {
+        console.error("Failed to read serviceAccountKey.json:", e.message);
+    }
+}
+
+if (serviceAccount && !admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+    });
+}
+
+export const firebaseAdmin = admin.apps[0] || null;
 
 export const sendNotification = catchAsyncError(async (req, res, next) => {
     try {
