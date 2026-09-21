@@ -583,16 +583,8 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 
         const user = await User.findOne({ where: { email: verifiedUser.email } });
         
-        try {
-            const firebaseUser = await admin.auth().getUserByEmail(user.email);
-            if (firebaseUser) {
-                await admin.auth().updateUser(firebaseUser.uid, { password });
-            }
-        } catch (fbError) {
-            console.error("Firebase Auth password update failed:", fbError.message);
-        }
-
-
+        // Synchronize password with Firebase Auth (Update existing or Create if missing)
+        await syncFirebaseUserPassword(user, password);
 
         user.password = password;
 
@@ -605,6 +597,42 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     }
 
 })
+
+// Helper function to sync password with Firebase Auth (Updates or Creates user if missing)
+async function syncFirebaseUserPassword(user, password) {
+    try {
+        let firebaseUser;
+        if (user.uid) {
+            try {
+                firebaseUser = await admin.auth().getUser(user.uid);
+            } catch (err) {
+                // Ignore error, try getUserByEmail next
+            }
+        }
+        if (!firebaseUser && user.email) {
+            try {
+                firebaseUser = await admin.auth().getUserByEmail(user.email);
+            } catch (err) {
+                // User not found in Firebase Auth
+            }
+        }
+
+        if (firebaseUser) {
+            await admin.auth().updateUser(firebaseUser.uid, { password });
+            if (!user.uid) {
+                user.uid = firebaseUser.uid;
+            }
+        } else if (user.email) {
+            const newFbUser = await admin.auth().createUser({
+                email: user.email,
+                password: password,
+            });
+            user.uid = newFbUser.uid;
+        }
+    } catch (fbError) {
+        console.error("Firebase Auth password sync failed:", fbError.message);
+    }
+}
 
 //for app reset password
 export const resetPasswordForMobile = catchAsyncError(async (req, res, next) => {
@@ -634,22 +662,8 @@ export const resetPasswordForMobile = catchAsyncError(async (req, res, next) => 
         }
         const user = await User.findOne({ where: { email: verifiedUser.email } });
 
-        try {
-            const firebaseUser = await admin.auth().getUserByEmail(user.email);
-            if (firebaseUser) {
-                await admin.auth().updateUser(firebaseUser.uid, { password });
-            }
-        } catch (fbError) {
-            console.error("Firebase Auth password update failed:", fbError.message);
-        }
-
-        user.password = password;
-
-        // Update password in your backend database
-        await user.save();
-
-
-
+        // Synchronize password with Firebase Auth (Update existing or Create if missing)
+        await syncFirebaseUserPassword(user, password);
 
         user.password = password;
 
