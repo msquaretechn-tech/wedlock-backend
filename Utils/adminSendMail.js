@@ -53,10 +53,14 @@ const sendAdminInfoEmail = async ({ email, subject, template, data }) => {
         const html = await ejs.renderFile(templatePath, data);
         console.log("Email template rendered successfully");
 
+        const formattedSubject = subject
+            ? (/-\s*wedlock$/i.test(subject.trim()) ? subject.trim() : `${subject.trim()} - Wedlock`)
+            : "Wedlock";
+
         const mailOptions = {
             from: process.env.SMTP_ADMIN_MAIL,
             to: email,
-            subject: subject,
+            subject: formattedSubject,
             html
         };
 
