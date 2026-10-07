@@ -1,4 +1,6 @@
 import personalDetails from "../Models/personalDetails.model.js";
+import Subscription from "../Models/subscription.model.js";
+import Plan from "../Models/plan.model.js";
 import qualificationDetails from "../Models/qualificationDetails.model.js";
 import locationDetails from "../Models/locationDetails.model.js";
 import otherDetails from "../Models/otherDetails.model.js";
@@ -24,6 +26,20 @@ import { parseHeight, parseIncome } from "../Utils/helper.js";
 
 
 dotenv.config();
+
+// Helper to get active plan name for a user
+const getActivePlanName = async (userId) => {
+  const latest = await Subscription.findOne({
+    where: { userId },
+    order: [["createdAt", "DESC"]],
+    include: [{ model: Plan, as: "plans", attributes: ["planName"] }],
+  });
+  if (latest && latest.plans && latest.plans.planName) {
+    return latest.plans.planName;
+  }
+  const user = await User.findOne({ where: { userId } });
+  return user?.usertype || "Standard";
+};
 
 export const myDetails = catchAsyncError(async (req, res, next) => {
   try {
@@ -772,12 +788,15 @@ export const UserDetails = catchAsyncError(async (req, res, next) => {
       return acc;
     }, {});
 
+    // 🔹 Get active plan name from Subscription table
+    const activePlanName = await getActivePlanName(userId);
+
     // 🔹 Conditionally construct data object
     const profileData = [{
       fcmToken,
       uid,
       profileImage: imageUploadData.image,
-      userType: user.usertype,
+      userType: activePlanName,
       ...(sectionStatus["basic_and_lifestyle"] !== false && {
         basic_and_lifestyle: {
           userId,
@@ -927,7 +946,7 @@ export const filterProfiles = catchAsyncError(async (req, res, next) => {
       community: 10,
     };
 
-    const data = recommendedUsers.map((user) => {
+    const data = await Promise.all(recommendedUsers.map(async (user) => {
       let matchScore = 0;
 
       if (user.religion === currentUser.religion) matchScore += weights.religion;
@@ -943,6 +962,7 @@ export const filterProfiles = catchAsyncError(async (req, res, next) => {
       if (user.community === community) matchScore += weights.community;
 
       const matchPercentage = (matchScore / totalScore) * 100;
+      const planName = await getActivePlanName(user.userId);
       return {
         userId: user.userId,
         gender: user.gender,
@@ -955,11 +975,11 @@ export const filterProfiles = catchAsyncError(async (req, res, next) => {
         occupation: user.occupation,
         state: user.state,
         country: user.country,
-        userType: user.usertype,
+        userType: planName,
         profileImages: user.image,
         match_percentage: matchPercentage,
       };
-    });
+    }));
 
     return res.status(200).json({
       success: true,
@@ -1338,28 +1358,31 @@ export const allProfiles = catchAsyncError(async (req, res, next) => {
 
 
 
-    const data = recommendedUsers.map((user) => {
-      let matchScore = 0;
-      return {
-        userId: user.userId,
-        uid: user.uid,
-        fcmToken: user.fcmToken,
-        gender: user.gender,
-        religion: user.religion,
-        age: user.age,
-        maritalStatus: user.maritalStatus,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        displayName: user.displayName,
-        occupation: user.occupation,
-        state: user.state,
-        country: user.country,
-        userType: user.usertype,
-        profileImages: user.image,
-        match_percentage: matchScore,
-
-      };
-    });
+    // Enrich each user with the current plan name from Subscription
+    const data = await Promise.all(
+      recommendedUsers.map(async (user) => {
+        let matchScore = 0; // keep existing placeholder logic
+        const planName = await getActivePlanName(user.userId);
+        return {
+          userId: user.userId,
+          uid: user.uid,
+          fcmToken: user.fcmToken,
+          gender: user.gender,
+          religion: user.religion,
+          age: user.age,
+          maritalStatus: user.maritalStatus,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          displayName: user.displayName,
+          occupation: user.occupation,
+          state: user.state,
+          country: user.country,
+          userType: planName,
+          profileImages: user.image,
+          match_percentage: matchScore,
+        };
+      })
+    );
 
 
 

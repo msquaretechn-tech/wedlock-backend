@@ -17,12 +17,27 @@ import imageUpload from "../Models/imageUpload.model.js";
 import recommendation from "../Models/recommendation.model.js";
 import FavProfile from "../Models/favProfile.model.js";
 import Subscription from "../Models/subscription.model.js";
+import Plan from "../Models/plan.model.js";
 import ToggleSection from "../Models/toggleSection.model.js";
 import Connection from "../Models/connection.model.js";
 import Notification from "../Models/notification.model.js";
 import Call from "../Models/call.model.js";
 import admin from 'firebase-admin';
 import { firebaseAdmin } from "./notification.controller.js"
+
+// Helper to get active plan name for a user
+const getActivePlanName = async (userId) => {
+  const latest = await Subscription.findOne({
+    where: { userId },
+    order: [["createdAt", "DESC"]],
+    include: [{ model: Plan, as: "plans", attributes: ["planName"] }],
+  });
+  if (latest && latest.plans && latest.plans.planName) {
+    return latest.plans.planName;
+  }
+  const user = await User.findOne({ where: { userId } });
+  return user?.usertype || "Standard";
+};
 import { SuspendedUser } from "../Models/association.js";
 dotenv.config();
 
@@ -878,7 +893,7 @@ export const AllUsers = catchAsyncError(async (req, res, next) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                plan: user.usertype,
+                plan: await getActivePlanName(user.userId),
                 displayName: displayName,
                 userAvatar: image
             };
@@ -997,7 +1012,7 @@ export const checkUserSuspensionStatus = catchAsyncError(async (req, res, next) 
         userDetails: {
             userId: user.userId,
             email: user.email,
-            usertype: user.usertype,
+            usertype: await getActivePlanName(user.userId),
             role: user.role,
             displayName: personal.displayName,
             aboutYourSelf: personal.aboutYourSelf,
