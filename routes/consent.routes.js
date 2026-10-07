@@ -1,6 +1,5 @@
 import express from "express";
 import { recordUserConsent, getUserConsentLog, verifyAgeGate } from "../Controllers/consent.controller.js";
-import { isAuthenticatedUser } from "../Middlewares/auth.js";
 
 const consentRouter = express.Router();
 

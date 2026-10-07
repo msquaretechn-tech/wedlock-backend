@@ -12,7 +12,6 @@ import locationDetails from "../Models/locationDetails.model.js";
 import otherDetails from "../Models/otherDetails.model.js";
 import personalDetails from "../Models/personalDetails.model.js";
 import qualificationDetails from "../Models/qualificationDetails.model.js";
-import subscription from "../Models/subscription.model.js";
 import imageUpload from "../Models/imageUpload.model.js";
 import recommendation from "../Models/recommendation.model.js";
 import FavProfile from "../Models/favProfile.model.js";
@@ -23,7 +22,8 @@ import Connection from "../Models/connection.model.js";
 import Notification from "../Models/notification.model.js";
 import Call from "../Models/call.model.js";
 import admin from 'firebase-admin';
-import { firebaseAdmin } from "./notification.controller.js"
+import { firebaseAdmin } from "./notification.controller.js";
+import { SuspendedUser } from "../Models/association.js";
 
 // Helper to get active plan name for a user
 const getActivePlanName = async (userId) => {
@@ -38,7 +38,6 @@ const getActivePlanName = async (userId) => {
   const user = await User.findOne({ where: { userId } });
   return user?.usertype || "Standard";
 };
-import { SuspendedUser } from "../Models/association.js";
 dotenv.config();
 
 // Register user
