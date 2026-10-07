@@ -27,16 +27,24 @@ import { SuspendedUser } from "../Models/association.js";
 
 // Helper to get active plan name for a user
 const getActivePlanName = async (userId) => {
-  const latest = await Subscription.findOne({
-    where: { userId },
-    order: [["createdAt", "DESC"]],
-    include: [{ model: Plan, as: "plans", attributes: ["planName"] }],
-  });
-  if (latest && latest.plans && latest.plans.planName) {
-    return latest.plans.planName;
+  try {
+    const latest = await Subscription.findOne({
+      where: { userId },
+      order: [["createdAt", "DESC"]],
+      include: [{ model: Plan, as: "plans", attributes: ["planName"] }],
+    });
+    if (latest && latest.plans && latest.plans.planName) {
+      return latest.plans.planName;
+    }
+  } catch (err) {
+    console.error("Error fetching active plan from Subscription in user.controller:", err.message);
   }
-  const user = await User.findOne({ where: { userId } });
-  return user?.usertype || "Standard";
+  try {
+    const user = await User.findOne({ where: { userId } });
+    return user?.usertype || "Standard";
+  } catch (err) {
+    return "Standard";
+  }
 };
 dotenv.config();
 

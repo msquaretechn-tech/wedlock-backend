@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { app } from './app.js';
 import connectDB from './Utils/db.js';
-import { User, Answer, personalDetails, otherDetails, locationDetails, imageUpload, qualificationDetails, FavProfile, happyStories, Connection, dropDownType, dropdown, ToggleSection, Plan } from './Models/association.js';
+import { User, Answer, personalDetails, otherDetails, locationDetails, imageUpload, qualificationDetails, FavProfile, happyStories, Connection, dropDownType, dropdown, ToggleSection, Plan, UserConsentLog } from './Models/association.js';
 import Recommendation from './Models/recommendation.model.js';
 import subscription from './Models/subscription.model.js';
 import call from './Models/call.model.js';
@@ -33,7 +33,7 @@ const startServer = async () => {
         await User.sync({ alter: true });
         await Answer.sync({ force: false });
         await personalDetails.sync({ force: false });
-        await otherDetails.sync({ force: false });
+        await otherDetails.sync({ alter: true });
         await locationDetails.sync({ force: false });
         await imageUpload.sync({ force: false });
         await qualificationDetails.sync({ force: false });
@@ -44,16 +44,16 @@ const startServer = async () => {
         await subscription.sync({ force: false });
         await dropDownType.sync({ force: false });
         await dropdown.sync({ force: false });
-        await subscription.sync({ force: false });
         await call.sync({ force: false });
         await Notification.sync({ force: false });
         await ToggleSection.sync({ force: false });
-        await Block.sync({ force: false })
+        await Block.sync({ force: false });
         await Report.sync({ force: false });
-        await SuspendedUser.sync({ force: false })
+        await SuspendedUser.sync({ force: false });
         await Admin.sync({ force: false });
         await AdminApiLog.sync({ force: false });
         await Contact.sync({ force: false });
+        await UserConsentLog.sync({ force: false });
         console.log('Tables synchronized');
 
 
