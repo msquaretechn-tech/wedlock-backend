@@ -1,6 +1,6 @@
 import express from "express";
 import { isAuthenticated } from '../Middlewares/auth.js';
-import { myDetails, updatePersonalDetails, updateFamilyDetails, updatePersonalBackground, updateReligiousBackground, updateLocationDetails, updateEducationAndFinancialDetails, MatchedProfiles, UserDetails, filterFieldCount, updateInterstAndHobbies, UpdatephotoUpload, adminProfileImage, matrimonialProfiles, getuserImage, allProfiles, getProfilePercentage, discoverProfiles, getFilteredProfile } from '../Controllers/profile.controller.js'
+import { myDetails, updatePersonalDetails, updateFamilyDetails, updatePersonalBackground, updateReligiousBackground, updateLocationDetails, updateEducationAndFinancialDetails, MatchedProfiles, UserDetails, filterFieldCount, updateInterstAndHobbies, UpdatephotoUpload, adminProfileImage, matrimonialProfiles, getuserImage, allProfiles, getProfilePercentage, discoverProfiles, getFilteredProfile, removeSensitiveInformation } from '../Controllers/profile.controller.js'
 import { upload } from "../Middlewares/multer.js";
 
 
@@ -20,6 +20,7 @@ profileRouter.put('/updateLocationDetails', isAuthenticated, updateLocationDetai
 profileRouter.put('/updateInterstAndHobbies', isAuthenticated, updateInterstAndHobbies);
 profileRouter.put('/updateEducationAndFinancialDetails', isAuthenticated, updateEducationAndFinancialDetails);
 profileRouter.put('/updatephotoUpload', isAuthenticated, upload.array('profileImage', 3), UpdatephotoUpload)
+profileRouter.put('/remove-sensitive-info', isAuthenticated, removeSensitiveInformation);
 profileRouter.get('/getProfiles', isAuthenticated, MatchedProfiles)
 profileRouter.get('/filterFieldCount', isAuthenticated, filterFieldCount)
 profileRouter.post('/getUserDetails', isAuthenticated, UserDetails)
@@ -33,3 +34,4 @@ profileRouter.get('/filtered-profiles', isAuthenticated, getFilteredProfile);
 
 
 export default profileRouter
+

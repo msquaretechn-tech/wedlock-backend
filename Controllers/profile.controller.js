@@ -1496,5 +1496,59 @@ export const getProfilePercentage = catchAsyncError(async (req, res, next) => {
   }
 
 
-})
+});
+
+/**
+ * Endpoint to remove sensitive information (religion, community, ethnicity, nationality, motherTongue)
+ * as required by Australian privacy compliance. Deletes the value completely (sets to NULL), not hide.
+ */
+export const removeSensitiveInformation = catchAsyncError(async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+    const { fields } = req.body; // e.g. ['religion', 'community', 'ethnicity', 'nationality', 'motherTongue']
+
+    if (!fields || !Array.isArray(fields) || fields.length === 0) {
+      return next(new errorhandler("Please specify an array of sensitive fields to remove!", 400));
+    }
+
+    const validFields = ["religion", "community", "ethnicity", "nationality", "motherTongue"];
+    const otherUpdates = {};
+    const locationUpdates = {};
+
+    fields.forEach((field) => {
+      if (validFields.includes(field)) {
+        if (field === "nationality") {
+          locationUpdates.nationality = null;
+        } else {
+          otherUpdates[field] = null;
+        }
+      }
+    });
+
+    if (Object.keys(otherUpdates).length > 0) {
+      await otherDetails.update(otherUpdates, { where: { userId } });
+      
+      // Sync with recommendation table if religion/community cleared
+      const recoUpdates = {};
+      if (otherUpdates.hasOwnProperty("religion")) recoUpdates.religion = null;
+      if (otherUpdates.hasOwnProperty("community")) recoUpdates.community = null;
+      if (Object.keys(recoUpdates).length > 0) {
+        await recommendation.update(recoUpdates, { where: { userId } });
+      }
+    }
+
+    if (Object.keys(locationUpdates).length > 0) {
+      await locationDetails.update(locationUpdates, { where: { userId } });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Specified sensitive information removed/deleted successfully.",
+      removedFields: fields,
+    });
+  } catch (error) {
+    return next(new errorhandler(error.message, 500));
+  }
+});
+
 

@@ -111,11 +111,7 @@ export const locationDetailsRegister = catchAsyncError(async (req, res, next) =>
 export const otherDetailsRegister = catchAsyncError(async (req, res, next) => {
 
     const userId = req.user.userId;
-    const { caste, community, dateOfBirth, timeOfBirth, religion, placeOfBirth } = req.body;
-
-    if (!caste || !community || !dateOfBirth || !timeOfBirth || !religion || !placeOfBirth) {
-        return res.status(400).json({ success: false, message: "All fields are required!" });
-    }
+    const { caste, community, dateOfBirth, timeOfBirth, religion, placeOfBirth, ethnicity, motherTongue } = req.body;
 
     const otherDetailsExist = await otherDetails.findOne({ where: { userId } });
 
@@ -123,9 +119,26 @@ export const otherDetailsRegister = catchAsyncError(async (req, res, next) => {
         return res.status(400).json({ success: false, message: "Other details already exist!" });
     }
 
-    const otherDetailsData = await otherDetails.create({ caste, community, dateOfBirth, timeOfBirth, religion, placeOfBirth, userId });
+    const otherDetailsData = await otherDetails.create({ 
+        caste: caste || "Not Specified", 
+        community: community || "Not Specified", 
+        dateOfBirth: dateOfBirth || null, 
+        timeOfBirth: timeOfBirth || null, 
+        religion: religion || "Not Specified", 
+        placeOfBirth: placeOfBirth || null, 
+        ethnicity: ethnicity || "Not Specified",
+        motherTongue: motherTongue || "Not Specified",
+        userId 
+    });
 
-    await recommendation.update({ caste, community, dateOfBirth, timeOfBirth, religion, placeOfBirth }, { where: { userId } });
+    await recommendation.update({ 
+        caste: caste || "Not Specified", 
+        community: community || "Not Specified", 
+        dateOfBirth: dateOfBirth || null, 
+        timeOfBirth: timeOfBirth || null, 
+        religion: religion || "Not Specified", 
+        placeOfBirth: placeOfBirth || null 
+    }, { where: { userId } });
 
 
     await User.update({ isOtherFormFilled: true }, { where: { userId } });

@@ -16,6 +16,10 @@ import dropDownType from './dropdowntype.model.js';
 import ToggleSection from './toggleSection.model.js';
 import Recommendation from './recommendation.model.js';
 import SuspendedUser from './Admin/suspended.user.js';
+import UserConsentLog from './userConsentLog.model.js';
+
+User.hasMany(UserConsentLog, { foreignKey: 'userId', as: 'consentLogs' });
+UserConsentLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 User.hasMany(Answer, { foreignKey: 'userId', as: 'answers' });
 Answer.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -123,4 +127,5 @@ User.hasMany(Recommendation, {
 
 
 
-export { User, Answer, personalDetails,SuspendedUser, Recommendation, otherDetails, locationDetails, imageUpload, qualificationDetails,FavProfile,happyStories,Connection,Plan,Subscription,dropdown,dropDownType,Notification ,ToggleSection};
+export { User, Answer, personalDetails,SuspendedUser, Recommendation, otherDetails, locationDetails, imageUpload, qualificationDetails,FavProfile,happyStories,Connection,Plan,Subscription,dropdown,dropDownType,Notification ,ToggleSection, UserConsentLog};
+

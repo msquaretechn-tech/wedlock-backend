@@ -27,12 +27,13 @@ const otherDetails = sequelize.define('otherDetails', {
     },
     caste:{
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
+        defaultValue: "Not Specified"
     },
     community: {
         type: DataTypes.STRING,
-        allowNull: false,
-        
+        allowNull: true,
+        defaultValue: "Not Specified"
     },
     subCommunity: {
         type: DataTypes.STRING,
@@ -41,19 +42,25 @@ const otherDetails = sequelize.define('otherDetails', {
     },
     dateOfBirth:{
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     timeOfBirth:{
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     religion:{
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
+        defaultValue: "Not Specified"
+    },
+    ethnicity:{
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: "Not Specified"
     },
     placeOfBirth:{
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     gotra:{
         type: DataTypes.STRING,

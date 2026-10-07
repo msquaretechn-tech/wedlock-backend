@@ -32,7 +32,11 @@ import fcmNotificationRouter from './firebase-push-notification/push.notificatio
 import contactRouter from './routes/contact.routes.js';
 import planRouter from './routes/Admin/plan.routes.js';
 import AdminSuspendUser from './routes/Admin/suspendedUser.routes.js';
+import consentRouter from './routes/consent.routes.js';
 dotenv.config();
+
+app.use("/api/v1/consent", consentRouter);
+
 
 
 
