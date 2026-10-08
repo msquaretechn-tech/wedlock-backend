@@ -74,7 +74,7 @@ export const registrationUser = catchAsyncError(async (req, res, next) => {
 
 
         try {
-            await sendEmail({ email, subject: "Activate Your Account", template: "activation-mail.ejs", data });
+            await sendEmail({ email, subject: "Activate Your Wedlock Account", template: "activation-mail.ejs", data });
 
             res.status(200).json({
                 success: true, message: `Please check your email: ${email} to activate your account!`,
@@ -518,7 +518,7 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
 
 
 
-        await sendEmail({ email, subject: "Reset Your Password", template: "forgotPassword-mail.ejs", data });
+        await sendEmail({ email, subject: "Reset Your Wedlock Password", template: "forgotPassword-mail.ejs", data });
 
         res.status(200).json({
             success: true, message: `Please check your email: ${email} for a verification code!`,

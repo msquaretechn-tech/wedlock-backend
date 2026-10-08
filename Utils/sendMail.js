@@ -54,7 +54,7 @@ const sendEmail = async ({ email, subject, template, data }) => {
         console.log("Email template rendered successfully");
 
         const formattedSubject = subject
-            ? (/-\s*wedlock$/i.test(subject.trim()) ? subject.trim() : `${subject.trim()} - Wedlock`)
+            ? (/wedlock/i.test(subject.trim()) ? subject.trim() : `${subject.trim()} - Wedlock`)
             : "Wedlock";
 
         const mailOptions = {
