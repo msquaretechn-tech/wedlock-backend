@@ -706,12 +706,25 @@ export const qualificationDropdown = catchAsyncError(async (req, res, next) => {
             return next(new errorhandler("Dropdown data not found!", 404));
         }
 
-        const data = dropdownData.map((dropdown) => {
+        const excludedQualifications = ["b.l.", "b.l", "m.l.", "m.l", "ias", "ies", "ifs", "irs", "ips"];
+        const filteredDropdownData = dropdownData.filter((item) => {
+            const val = (item.dropdownValue || "").trim().toLowerCase();
+            return !excludedQualifications.includes(val);
+        });
+
+        const data = filteredDropdownData.map((item) => {
             return {
-                id: dropdown.id,
-                value: dropdown.dropdownValue,
+                id: item.id,
+                value: item.dropdownValue,
             };
         });
+
+        if (!data.some((item) => (item.value || "").trim().toLowerCase() === "other")) {
+            data.push({
+                id: "other",
+                value: "Other",
+            });
+        }
 
         res.status(200).json({
             success: true,

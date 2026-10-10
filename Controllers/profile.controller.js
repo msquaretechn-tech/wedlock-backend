@@ -1536,11 +1536,10 @@ export const getProfilePercentage = catchAsyncError(async (req, res, next) => {
 export const removeSensitiveInformation = catchAsyncError(async (req, res, next) => {
   try {
     const userId = req.user.userId;
-    const { fields } = req.body; // e.g. ['religion', 'community', 'ethnicity', 'nationality', 'motherTongue']
-
-    if (!fields || !Array.isArray(fields) || fields.length === 0) {
-      return next(new errorhandler("Please specify an array of sensitive fields to remove!", 400));
-    }
+    const defaultFields = ["religion", "community", "ethnicity", "nationality", "motherTongue"];
+    const fields = (req.body && Array.isArray(req.body.fields) && req.body.fields.length > 0)
+      ? req.body.fields
+      : defaultFields;
 
     const validFields = ["religion", "community", "ethnicity", "nationality", "motherTongue"];
     const otherUpdates = {};

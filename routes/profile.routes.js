@@ -21,6 +21,7 @@ profileRouter.put('/updateInterstAndHobbies', isAuthenticated, updateInterstAndH
 profileRouter.put('/updateEducationAndFinancialDetails', isAuthenticated, updateEducationAndFinancialDetails);
 profileRouter.put('/updatephotoUpload', isAuthenticated, upload.array('profileImage', 3), UpdatephotoUpload)
 profileRouter.put('/remove-sensitive-info', isAuthenticated, removeSensitiveInformation);
+profileRouter.post('/remove-sensitive-info', isAuthenticated, removeSensitiveInformation);
 profileRouter.get('/getProfiles', isAuthenticated, MatchedProfiles)
 profileRouter.get('/filterFieldCount', isAuthenticated, filterFieldCount)
 profileRouter.post('/getUserDetails', isAuthenticated, UserDetails)
