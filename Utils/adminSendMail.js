@@ -58,7 +58,7 @@ const sendAdminInfoEmail = async ({ email, subject, template, data }) => {
             : "Wedlock";
 
         const mailOptions = {
-            from: process.env.SMTP_ADMIN_MAIL,
+            from: `"Wedlock Admin" <${process.env.SMTP_ADMIN_MAIL}>`,
             to: email,
             subject: formattedSubject,
             html

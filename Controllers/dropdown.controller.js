@@ -1092,12 +1092,25 @@ export const australianVisaStatusDropdown = catchAsyncError(async (req, res, nex
             return next(new errorhandler(`Dropdown type '${dropdownType}' does not exist!`, 400));
         }
 
+        const notApplicableExist = await dropdown.findOne({
+            where: {
+                dropDownTypeId: dropdownTypeExist.dropDownTypeId,
+                dropdownValue: { [Op.iLike]: "Not applicable" }
+            }
+        });
 
+        if (!notApplicableExist) {
+            await dropdown.create({
+                dropDownTypeId: dropdownTypeExist.dropDownTypeId,
+                dropdownValue: "Not applicable"
+            });
+        }
 
         const dropdownData = await dropdown.findAll({
             where: {
                 dropDownTypeId: dropdownTypeExist.dropDownTypeId,
             },
+            order: [['id', 'ASC']]
         });
 
         if (!dropdownData) {

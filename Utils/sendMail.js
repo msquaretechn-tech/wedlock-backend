@@ -58,7 +58,7 @@ const sendEmail = async ({ email, subject, template, data }) => {
             : "Wedlock";
 
         const mailOptions = {
-            from: process.env.SMTP_MAIL,
+            from: `"Wedlock" <${process.env.SMTP_MAIL}>`,
             to: email,
             subject: formattedSubject,
             html
