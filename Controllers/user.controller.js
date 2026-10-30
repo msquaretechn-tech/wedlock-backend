@@ -24,6 +24,7 @@ import Call from "../Models/call.model.js";
 import admin from 'firebase-admin';
 import { firebaseAdmin } from "./notification.controller.js";
 import { SuspendedUser } from "../Models/association.js";
+import { sendOtpToPhone, verifyPhoneOtp } from "../Utils/twilio.js";
 
 // Helper to get active plan name for a user
 const getActivePlanName = async (userId) => {
@@ -362,6 +363,110 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
     }
 
 });
+
+// Helper to look up user by mobile number
+const findUserByMobile = async (phoneNumber) => {
+    if (!phoneNumber) return null;
+    const digits = phoneNumber.toString().replace(/\D/g, '').slice(-10);
+    if (!digits || digits.length < 10) return null;
+
+    // Check personalDetails table (exact 10 digits or ending with 10 digits)
+    const personal = await personalDetails.findOne({
+        where: {
+            [Op.or]: [
+                { contactNumber: digits },
+                { contactNumber: { [Op.like]: `%${digits}` } }
+            ]
+        }
+    });
+
+    if (personal && personal.userId) {
+        const user = await User.findByPk(personal.userId);
+        if (user) return { user, personal };
+    }
+
+    // Fallback: check recommendation table
+    const reco = await recommendation.findOne({
+        where: {
+            [Op.or]: [
+                { contactNumber: digits },
+                { contactNumber: { [Op.like]: `%${digits}` } }
+            ]
+        }
+    });
+
+    if (reco && reco.userId) {
+        const user = await User.findByPk(reco.userId);
+        if (user) return { user, reco };
+    }
+
+    return null;
+};
+
+// Send OTP to user's mobile number for login
+export const sendLoginOtp = catchAsyncError(async (req, res, next) => {
+    try {
+        const { phoneNumber, countryCode = "+91" } = req.body;
+
+        if (!phoneNumber) {
+            return next(new errorhandler("Please enter your mobile number!", 400));
+        }
+
+        const found = await findUserByMobile(phoneNumber);
+        if (!found || !found.user) {
+            return next(
+                new errorhandler(
+                    "No account found with this mobile number. Please register first or login with email.",
+                    404
+                )
+            );
+        }
+
+        if (found.user.userStatus === false) {
+            return next(new errorhandler("Your account has been deactivated. Please contact support.", 403));
+        }
+
+        const result = await sendOtpToPhone(phoneNumber, countryCode);
+
+        res.status(200).json({
+            success: true,
+            message: result.message || "OTP sent to your mobile number successfully!",
+            isDemo: result.isDemo || false,
+        });
+    } catch (error) {
+        return next(new errorhandler(error.message, 500));
+    }
+});
+
+// Verify OTP and issue login tokens
+export const verifyMobileOtpAndLogin = catchAsyncError(async (req, res, next) => {
+    try {
+        const { phoneNumber, otp, countryCode = "+91" } = req.body;
+
+        if (!phoneNumber || !otp) {
+            return next(new errorhandler("Please enter mobile number and OTP!", 400));
+        }
+
+        const found = await findUserByMobile(phoneNumber);
+        if (!found || !found.user) {
+            return next(new errorhandler("User not found!", 404));
+        }
+
+        if (found.user.userStatus === false) {
+            return next(new errorhandler("Your account has been deactivated. Please contact support.", 403));
+        }
+
+        const isVerified = await verifyPhoneOtp(phoneNumber, otp, countryCode);
+        if (!isVerified) {
+            return next(new errorhandler("Invalid or expired OTP!", 400));
+        }
+
+        sendToken(found.user, 200, res, "Login successful!");
+    } catch (error) {
+        return next(new errorhandler(error.message, 500));
+    }
+});
+
 
 
 

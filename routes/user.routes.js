@@ -1,7 +1,7 @@
 import express from "express";
 const userRouter = express.Router();
 
-import { registrationUser,activateUser,setPassword,checkUserSuspensionStatus,loginUser,logoutUser,forgotPassword,verifyOtp,resetPassword,activateUserForMobile ,setPasswordForMobile,verifyOtpForMobile,resetPasswordForMobile,createOrUpdateFCMToken,dummyRegister,dummyactivateUserForMobile,dummyPasswordForMobile,deleteUser, updateAccessToken,adminLogin,AllUsers,AllCustomers} from "../Controllers/user.controller.js";
+import { registrationUser,activateUser,setPassword,checkUserSuspensionStatus,loginUser,logoutUser,forgotPassword,verifyOtp,resetPassword,activateUserForMobile ,setPasswordForMobile,verifyOtpForMobile,resetPasswordForMobile,createOrUpdateFCMToken,dummyRegister,dummyactivateUserForMobile,dummyPasswordForMobile,deleteUser, updateAccessToken,adminLogin,AllUsers,AllCustomers, sendLoginOtp, verifyMobileOtpAndLogin } from "../Controllers/user.controller.js";
 import { isAuthenticated } from "../Middlewares/auth.js";
 
 
@@ -11,6 +11,8 @@ userRouter.post('/activate-user-mobile',activateUserForMobile);
 userRouter.post('/set-password-mobile',setPasswordForMobile);
 userRouter.post("/set-password", setPassword);
 userRouter.post("/login", loginUser);
+userRouter.post("/send-login-otp", sendLoginOtp);
+userRouter.post("/verify-login-otp", verifyMobileOtpAndLogin);
 userRouter.post('/admin-login', adminLogin)
 userRouter.get('/get-All-users',isAuthenticated,AllUsers)
 userRouter.get('/get-All-Customers',isAuthenticated,AllCustomers)
