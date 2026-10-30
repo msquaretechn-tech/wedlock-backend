@@ -20,12 +20,22 @@ export const createPlan = catchAsyncError(async (req, res, next) => {
         name: planName + " Plan",
       });
   
+      let recurringConfig = {
+        interval: "month",
+      };
+      if (planType === "Yearly" || Number(durationInMonths) >= 12) {
+        recurringConfig = { interval: "year" };
+      } else if (Number(durationInMonths) > 1) {
+        recurringConfig = {
+          interval: "month",
+          interval_count: Number(durationInMonths),
+        };
+      }
+
       const stripePrice = await stripe.prices.create({
         unit_amount: Math.round(price * 100), 
         currency: "aud",
-        recurring: {
-          interval: "month",
-        },
+        recurring: recurringConfig,
         product: product.id,
       });
   
@@ -129,15 +139,25 @@ export const editPlan = catchAsyncError(async (req, res, next) => {
       name: existingPlan.planName,
     });
 
-    // ✅ Create new Stripe price linked to that product
-    const newStripePrice = await stripe.prices.create({
-      unit_amount: Math.round(price * 100),
-      currency: "aud",
-      recurring: {
-        interval: planType === "Yearly" ? "year" : "month",
-      },
-      product: product.id,
-    });
+      let recurringConfig = {
+        interval: "month",
+      };
+      if (planType === "Yearly" || Number(durationInMonths) >= 12) {
+        recurringConfig = { interval: "year" };
+      } else if (Number(durationInMonths) > 1) {
+        recurringConfig = {
+          interval: "month",
+          interval_count: Number(durationInMonths),
+        };
+      }
+
+      // ✅ Create new Stripe price linked to that product
+      const newStripePrice = await stripe.prices.create({
+        unit_amount: Math.round(price * 100),
+        currency: "aud",
+        recurring: recurringConfig,
+        product: product.id,
+      });
 
     // ✅ Update the plan (but keep planName and planId same)
     await existingPlan.update({
@@ -180,7 +200,23 @@ export const getPlansSimple = catchAsyncError(async (req, res, next) => {
     }
 
     const monthlyPlans = plans
-      .filter((p) => p.planType === "Monthly")
+      .filter((p) => (p.planType === "Monthly" || Number(p.durationInMonths) === 1) && !p.planType?.includes("3") && !p.planType?.includes("6"))
+      .map((p) => ({
+        planType: p.planType,
+        planName: p.planName,
+        price: p.price,
+      }));
+
+    const threeMonthPlans = plans
+      .filter((p) => p.planType === "3-Month" || Number(p.durationInMonths) === 3)
+      .map((p) => ({
+        planType: p.planType,
+        planName: p.planName,
+        price: p.price,
+      }));
+
+    const sixMonthPlans = plans
+      .filter((p) => p.planType === "6-Month" || Number(p.durationInMonths) === 6)
       .map((p) => ({
         planType: p.planType,
         planName: p.planName,
@@ -188,7 +224,7 @@ export const getPlansSimple = catchAsyncError(async (req, res, next) => {
       }));
 
     const yearlyPlans = plans
-      .filter((p) => p.planType === "Yearly")
+      .filter((p) => p.planType === "Yearly" || Number(p.durationInMonths) >= 12)
       .map((p) => ({
         planType: p.planType,
         planName: p.planName,
@@ -199,6 +235,8 @@ export const getPlansSimple = catchAsyncError(async (req, res, next) => {
       success: true,
       data: {
         Monthly: monthlyPlans,
+        "3-Month": threeMonthPlans,
+        "6-Month": sixMonthPlans,
         Yearly: yearlyPlans,
       },
       message: "Plans fetched successfully!",

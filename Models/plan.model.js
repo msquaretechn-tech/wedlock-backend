@@ -17,7 +17,7 @@ const plan = sequelize.define("plan", {
     allowNull: true,
   },
   planType: {
-    type: DataTypes.ENUM("Monthly", "Yearly"),
+    type: DataTypes.STRING,
     allowNull: true,
   },
   featureList: {

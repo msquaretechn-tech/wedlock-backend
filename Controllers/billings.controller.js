@@ -67,13 +67,20 @@ export const getBillingInfo = catchAsyncError(async (req, res, next) => {
     const totalDays = expirationDate.diff(startDate, "days"); 
 
     
-    const isYearly = currentPlan.durationInMonths >= 12;
+    const planDurationLabel =
+      currentPlan.durationInMonths >= 12
+        ? "Year"
+        : currentPlan.durationInMonths === 6
+        ? "6 Months"
+        : currentPlan.durationInMonths === 3
+        ? "3 Months"
+        : "Month";
 
     const data = {
       currentPlan: currentPlan.planName.split(" ")[0],
       totalDays,
       expirationDate: expirationDate.format("ll"), 
-      planType: isYearly ? "Year" : "Month",
+      planType: planDurationLabel,
       notifications: remainingDays <= 6, 
       remainingDays,
       price: `$${currentPlan.price}`,

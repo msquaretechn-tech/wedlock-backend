@@ -16,6 +16,9 @@ import Contact from './Models/contact.model.js';
 import SuspendedUser from './Models/Admin/suspended.user.js';
 
 
+import { ensureSubscriptionPlans } from './Utils/seedPlans.js';
+
+
 dotenv.config();
 
 
@@ -29,7 +32,7 @@ const startServer = async () => {
         const server = createServer(app);
         intializeSocket(server);
 
-        await Plan.sync({ force: false });
+        await Plan.sync({ alter: true });
         await User.sync({ alter: true });
         await Answer.sync({ force: false });
         await personalDetails.sync({ force: false });
@@ -55,6 +58,9 @@ const startServer = async () => {
         await Contact.sync({ force: false });
         await UserConsentLog.sync({ force: false });
         console.log('Tables synchronized');
+
+        // Automatically ensure 3-Month and 6-Month plans exist
+        await ensureSubscriptionPlans();
 
 
         // app.listen(PORT, () => {
