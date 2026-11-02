@@ -422,8 +422,10 @@ export const sendLoginOtp = catchAsyncError(async (req, res, next) => {
             );
         }
 
-        if (found.user.userStatus === false) {
-            return next(new errorhandler("Your account has been deactivated. Please contact support.", 403));
+        // Check if user is suspended by admin
+        const isSuspended = await SuspendedUser.findOne({ where: { userId: found.user.userId } });
+        if (isSuspended) {
+            return next(new errorhandler("Your account has been suspended. Please contact support.", 403));
         }
 
         const result = await sendOtpToPhone(phoneNumber, countryCode);
@@ -452,8 +454,10 @@ export const verifyMobileOtpAndLogin = catchAsyncError(async (req, res, next) =>
             return next(new errorhandler("User not found!", 404));
         }
 
-        if (found.user.userStatus === false) {
-            return next(new errorhandler("Your account has been deactivated. Please contact support.", 403));
+        // Check if user is suspended by admin
+        const isSuspended = await SuspendedUser.findOne({ where: { userId: found.user.userId } });
+        if (isSuspended) {
+            return next(new errorhandler("Your account has been suspended. Please contact support.", 403));
         }
 
         const isVerified = await verifyPhoneOtp(phoneNumber, otp, countryCode);
