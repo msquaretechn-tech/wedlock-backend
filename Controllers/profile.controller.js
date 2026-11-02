@@ -27,27 +27,7 @@ import { parseHeight, parseIncome } from "../Utils/helper.js";
 
 dotenv.config();
 
-// Helper to get active plan name for a user
-const getActivePlanName = async (userId) => {
-  try {
-    const latest = await Subscription.findOne({
-      where: { userId },
-      order: [["createdAt", "DESC"]],
-      include: [{ model: Plan, as: "plans", attributes: ["planName"] }],
-    });
-    if (latest && latest.plans && latest.plans.planName) {
-      return latest.plans.planName;
-    }
-  } catch (err) {
-    console.error("Error fetching active plan from Subscription in profile.controller:", err.message);
-  }
-  try {
-    const user = await User.findOne({ where: { userId } });
-    return user?.usertype || "Standard";
-  } catch (err) {
-    return "Standard";
-  }
-};
+import { getActivePlanName, syncUserActivePlan } from "../Utils/activePlan.js";
 
 export const myDetails = catchAsyncError(async (req, res, next) => {
   try {
@@ -635,6 +615,9 @@ export const getFilteredProfile = catchAsyncError(async (req, res, next) => {
   try {
     const { userId } = req.user;
 
+    // Sync current user's active plan status (auto-expire if passed endDate)
+    await syncUserActivePlan(userId);
+
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const sortBy = req.query.sortBy || 'age';
@@ -723,6 +706,18 @@ export const getFilteredProfile = catchAsyncError(async (req, res, next) => {
       return a[sortBy] < b[sortBy] ? 1 : -1;
     });
 
+    // 6. Enrich profiles with up-to-date active plan name (auto-expires if past endDate)
+    profiles = await Promise.all(
+      profiles.map(async (profile) => {
+        const planName = await getActivePlanName(profile.userId);
+        return {
+          ...profile,
+          userType: planName,
+          usertype: planName,
+        };
+      })
+    );
+
     return res.status(200).json({
       success: true,
       profiles,
@@ -805,6 +800,7 @@ export const UserDetails = catchAsyncError(async (req, res, next) => {
       uid,
       profileImage: imageUploadData.image,
       userType: activePlanName,
+      usertype: activePlanName,
       ...(sectionStatus["basic_and_lifestyle"] !== false && {
         basic_and_lifestyle: {
           userId,
@@ -984,6 +980,7 @@ export const filterProfiles = catchAsyncError(async (req, res, next) => {
         state: user.state,
         country: user.country,
         userType: planName,
+        usertype: planName,
         profileImages: user.image,
         match_percentage: matchPercentage,
       };
@@ -1386,6 +1383,7 @@ export const allProfiles = catchAsyncError(async (req, res, next) => {
           state: user.state,
           country: user.country,
           userType: planName,
+          usertype: planName,
           profileImages: user.image,
           match_percentage: matchScore,
         };

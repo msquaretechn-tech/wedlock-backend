@@ -14,6 +14,7 @@ import paypalClient from "../config/paypal.js";
 import paypal from "@paypal/checkout-server-sdk";
 import sendEmail from "../Utils/sendMail.js";
 import { validateExclusiveEligibility, EXCLUSIVE_CRITERIA_LIST } from "../Utils/exclusiveCriteria.js";
+import { syncUserActivePlan } from "../Utils/activePlan.js";
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -176,13 +177,13 @@ export const checkSubscriptionStatus = catchAsyncError(async (req, res, next) =>
     try {
         const userId = req.user.userId;
 
-
-        // Get the latest active subscription
-        const user = await User.findOne({ where: { userId } });
+        // Get the latest active subscription (auto-expires if past endDate)
+        const activePlan = await syncUserActivePlan(userId);
 
         res.status(200).json({
             success: true,
-            usertype: user.usertype,
+            usertype: activePlan,
+            userType: activePlan,
         });
 
     } catch (error) {

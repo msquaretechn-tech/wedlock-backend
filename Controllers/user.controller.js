@@ -26,27 +26,7 @@ import { firebaseAdmin } from "./notification.controller.js";
 import { SuspendedUser } from "../Models/association.js";
 import { sendOtpToPhone, verifyPhoneOtp } from "../Utils/twilio.js";
 
-// Helper to get active plan name for a user
-const getActivePlanName = async (userId) => {
-  try {
-    const latest = await Subscription.findOne({
-      where: { userId },
-      order: [["createdAt", "DESC"]],
-      include: [{ model: Plan, as: "plans", attributes: ["planName"] }],
-    });
-    if (latest && latest.plans && latest.plans.planName) {
-      return latest.plans.planName;
-    }
-  } catch (err) {
-    console.error("Error fetching active plan from Subscription in user.controller:", err.message);
-  }
-  try {
-    const user = await User.findOne({ where: { userId } });
-    return user?.usertype || "Standard";
-  } catch (err) {
-    return "Standard";
-  }
-};
+import { getActivePlanName, syncUserActivePlan } from "../Utils/activePlan.js";
 dotenv.config();
 
 // Register user
@@ -357,6 +337,7 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
         //     role: user.role,
         //     isVerified: user.isVerified
         // }
+        user.usertype = await syncUserActivePlan(user.userId);
         sendToken(user, 200, res, "Login successful!");
     } catch (error) {
         return next(new errorhandler(error.message, 500));
@@ -465,6 +446,7 @@ export const verifyMobileOtpAndLogin = catchAsyncError(async (req, res, next) =>
             return next(new errorhandler("Invalid or expired OTP!", 400));
         }
 
+        found.user.usertype = await syncUserActivePlan(found.user.userId);
         sendToken(found.user, 200, res, "Login successful!");
     } catch (error) {
         return next(new errorhandler(error.message, 500));
