@@ -1581,4 +1581,72 @@ export const removeSensitiveInformation = catchAsyncError(async (req, res, next)
   }
 });
 
+// Get contact number by userId
+export const getContactNumberByUserId = catchAsyncError(async (req, res, next) => {
+  try {
+    const targetUserId = req.params.userId || req.user?.userId;
+
+    if (!targetUserId) {
+      return next(new errorhandler("User ID is required", 400));
+    }
+
+    const personal = await personalDetails.findOne({
+      where: { userId: targetUserId },
+      attributes: ['contactNumber']
+    });
+
+    return res.status(200).json({
+      success: true,
+      contactNumber: personal?.contactNumber || null
+    });
+  } catch (error) {
+    return next(new errorhandler(error.message, 500));
+  }
+});
+
+// Update contact number by userId
+export const updateContactNumberByUserId = catchAsyncError(async (req, res, next) => {
+  try {
+    const targetUserId = req.params.userId || req.user?.userId;
+    const { contactNumber } = req.body;
+
+    if (!targetUserId) {
+      return next(new errorhandler("User ID is required", 400));
+    }
+
+    if (!contactNumber) {
+      return next(new errorhandler("Contact number is required", 400));
+    }
+
+    const cleanedNumber = contactNumber.toString().replace(/\D/g, '').slice(-10);
+    if (cleanedNumber.length !== 10) {
+      return next(new errorhandler("Contact number must be exactly 10 digits", 400));
+    }
+
+    const personal = await personalDetails.findOne({ where: { userId: targetUserId } });
+    if (!personal) {
+      return next(new errorhandler("Personal details not found for this user", 404));
+    }
+
+    await personalDetails.update(
+      { contactNumber: cleanedNumber },
+      { where: { userId: targetUserId } }
+    );
+
+    await recommendation.update(
+      { contactNumber: cleanedNumber },
+      { where: { userId: targetUserId } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Contact number updated successfully",
+      contactNumber: cleanedNumber
+    });
+  } catch (error) {
+    return next(new errorhandler(error.message, 500));
+  }
+});
+
+
 

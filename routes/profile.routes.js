@@ -1,6 +1,6 @@
 import express from "express";
 import { isAuthenticated } from '../Middlewares/auth.js';
-import { myDetails, updatePersonalDetails, updateFamilyDetails, updatePersonalBackground, updateReligiousBackground, updateLocationDetails, updateEducationAndFinancialDetails, MatchedProfiles, UserDetails, filterFieldCount, updateInterstAndHobbies, UpdatephotoUpload, adminProfileImage, matrimonialProfiles, getuserImage, allProfiles, getProfilePercentage, discoverProfiles, getFilteredProfile, removeSensitiveInformation } from '../Controllers/profile.controller.js'
+import { myDetails, updatePersonalDetails, updateFamilyDetails, updatePersonalBackground, updateReligiousBackground, updateLocationDetails, updateEducationAndFinancialDetails, MatchedProfiles, UserDetails, filterFieldCount, updateInterstAndHobbies, UpdatephotoUpload, adminProfileImage, matrimonialProfiles, getuserImage, allProfiles, getProfilePercentage, discoverProfiles, getFilteredProfile, removeSensitiveInformation, getContactNumberByUserId, updateContactNumberByUserId } from '../Controllers/profile.controller.js'
 import { upload } from "../Middlewares/multer.js";
 
 
@@ -31,6 +31,12 @@ profileRouter.get('/allProfiles', isAuthenticated, allProfiles)
 profileRouter.get('/discoverProfiles', isAuthenticated, discoverProfiles)
 profileRouter.get('/getProfilePercentage', isAuthenticated, getProfilePercentage)
 profileRouter.get('/filtered-profiles', isAuthenticated, getFilteredProfile);
+
+// Contact Number Routes
+profileRouter.get('/contact/:userId', isAuthenticated, getContactNumberByUserId);
+profileRouter.put('/contact/:userId', isAuthenticated, updateContactNumberByUserId);
+profileRouter.get('/contact', isAuthenticated, getContactNumberByUserId);
+profileRouter.put('/contact', isAuthenticated, updateContactNumberByUserId);
 
 
 
