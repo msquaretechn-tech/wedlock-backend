@@ -313,107 +313,61 @@ export const setPasswordForMobile = catchAsyncError(async (req, res, next) => {
     }
 });
 
-export const loginUser = catchAsyncError(async (req, res, next) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ where: { email } });
-        if (!user) {
-            return next(new errorhandler("You are not registered!", 400));
-        }
-        if (!email || !password) {
-            return next(new errorhandler("Please enter email and password!", 400));
-        }
-
-        const isPasswordMatched = await user.validPassword(password);
-
-        if (!isPasswordMatched) {
-            return next(new errorhandler("Invalid email or password!", 400));
-        }
-
-        // const userData = {
-        //     userid: user.userId,
-        //     email: user.email,
-        //     usertype: user.usertype,
-        //     role: user.role,
-        //     isVerified: user.isVerified
-        // }
-        user.usertype = await syncUserActivePlan(user.userId);
-        sendToken(user, 200, res, "Login successful!");
-    } catch (error) {
-        return next(new errorhandler(error.message, 500));
-    }
-
-});
-
-// Helper to look up user by mobile number
-const findUserByMobile = async (phoneNumber) => {
-    if (!phoneNumber) return null;
-    const digits = phoneNumber.toString().replace(/\D/g, '').slice(-10);
-    if (!digits || digits.length < 10) return null;
-
-    // Check personalDetails table (exact 10 digits or ending with 10 digits)
-    const personal = await personalDetails.findOne({
-        where: {
-            [Op.or]: [
-                { contactNumber: digits },
-                { contactNumber: { [Op.like]: `%${digits}` } }
-            ]
-        }
-    });
-
-    if (personal && personal.userId) {
-        const user = await User.findByPk(personal.userId);
-        if (user) return { user, personal };
-    }
-
-    // Fallback: check recommendation table
-    const reco = await recommendation.findOne({
-        where: {
-            [Op.or]: [
-                { contactNumber: digits },
-                { contactNumber: { [Op.like]: `%${digits}` } }
-            ]
-        }
-    });
-
-    if (reco && reco.userId) {
-        const user = await User.findByPk(reco.userId);
-        if (user) return { user, reco };
-    }
-
-    return null;
+// Looks up the mobile number registered for a user
+const getUserMobile = async (userId) => {
+    const personal = await personalDetails.findOne({ where: { userId } });
+    if (personal?.contactNumber) return personal.contactNumber.toString();
+    const reco = await recommendation.findOne({ where: { userId } });
+    return reco?.contactNumber ? reco.contactNumber.toString() : null;
 };
 
-// Send OTP to user's mobile number for login
-export const sendLoginOtp = catchAsyncError(async (req, res, next) => {
+const maskMobile = (phone) => {
+    const digits = phone.replace(/\D/g, "");
+    return `${"*".repeat(Math.max(digits.length - 4, 0))}${digits.slice(-4)}`;
+};
+
+// Step 1/2 of login: validates email + password. Returns the user or calls next() with an error.
+const authenticateWithPassword = async (req, next) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        next(new errorhandler("Please enter email and password!", 400));
+        return null;
+    }
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+        next(new errorhandler("You are not registered!", 400));
+        return null;
+    }
+    if (!(await user.validPassword(password))) {
+        next(new errorhandler("Invalid email or password!", 400));
+        return null;
+    }
+    const isSuspended = await SuspendedUser.findOne({ where: { userId: user.userId } });
+    if (isSuspended) {
+        next(new errorhandler("Your account has been suspended. Please contact support.", 403));
+        return null;
+    }
+    return user;
+};
+
+// Step 1: email + password are checked, then an OTP is sent to the registered mobile.
+// No session is issued until the OTP is verified (see verifyMobileOtpAndLogin).
+export const loginUser = catchAsyncError(async (req, res, next) => {
     try {
-        const { phoneNumber, countryCode = "+91" } = req.body;
+        const user = await authenticateWithPassword(req, next);
+        if (!user) return;
 
-        if (!phoneNumber) {
-            return next(new errorhandler("Please enter your mobile number!", 400));
+        const phone = await getUserMobile(user.userId);
+        if (!phone) {
+            return next(new errorhandler("No mobile number is registered on this account. Please contact support.", 400));
         }
 
-        const found = await findUserByMobile(phoneNumber);
-        if (!found || !found.user) {
-            return next(
-                new errorhandler(
-                    "No account found with this mobile number. Please register first or login with email.",
-                    404
-                )
-            );
-        }
-
-        // Check if user is suspended by admin
-        const isSuspended = await SuspendedUser.findOne({ where: { userId: found.user.userId } });
-        if (isSuspended) {
-            return next(new errorhandler("Your account has been suspended. Please contact support.", 403));
-        }
-
-        const result = await sendOtpToPhone(phoneNumber, countryCode);
-
+        const result = await sendOtpToPhone(phone, "+91");
         res.status(200).json({
             success: true,
-            message: result.message || "OTP sent to your mobile number successfully!",
+            otpRequired: true,
+            maskedPhone: maskMobile(phone),
+            message: result.message || "OTP sent to your registered mobile number!",
             isDemo: result.isDemo || false,
         });
     } catch (error) {
@@ -421,43 +375,33 @@ export const sendLoginOtp = catchAsyncError(async (req, res, next) => {
     }
 });
 
-// Verify OTP and issue login tokens
+// Step 2: re-validates email + password and verifies the OTP before issuing tokens.
 export const verifyMobileOtpAndLogin = catchAsyncError(async (req, res, next) => {
     try {
-        const { phoneNumber, otp, countryCode = "+91" } = req.body;
-
-        if (!phoneNumber || !otp) {
-            return next(new errorhandler("Please enter mobile number and OTP!", 400));
+        const { otp } = req.body;
+        if (!otp) {
+            return next(new errorhandler("Please enter the OTP!", 400));
         }
 
-        const found = await findUserByMobile(phoneNumber);
-        if (!found || !found.user) {
-            return next(new errorhandler("User not found!", 404));
+        const user = await authenticateWithPassword(req, next);
+        if (!user) return;
+
+        const phone = await getUserMobile(user.userId);
+        if (!phone) {
+            return next(new errorhandler("No mobile number is registered on this account. Please contact support.", 400));
         }
 
-        // Check if user is suspended by admin
-        const isSuspended = await SuspendedUser.findOne({ where: { userId: found.user.userId } });
-        if (isSuspended) {
-            return next(new errorhandler("Your account has been suspended. Please contact support.", 403));
-        }
-
-        const isVerified = await verifyPhoneOtp(phoneNumber, otp, countryCode);
+        const isVerified = await verifyPhoneOtp(phone, otp, "+91");
         if (!isVerified) {
             return next(new errorhandler("Invalid or expired OTP!", 400));
         }
 
-        found.user.usertype = await syncUserActivePlan(found.user.userId);
-        sendToken(found.user, 200, res, "Login successful!");
+        user.usertype = await syncUserActivePlan(user.userId);
+        sendToken(user, 200, res, "Login successful!");
     } catch (error) {
         return next(new errorhandler(error.message, 500));
     }
 });
-
-
-
-
-
-
 
 // export const loginUser = catchAsyncError(async (req, res, next) => {
 //     try {
