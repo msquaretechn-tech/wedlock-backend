@@ -1616,9 +1616,20 @@ export const updateContactNumberByUserId = catchAsyncError(async (req, res, next
       return next(new errorhandler("Contact number is required", 400));
     }
 
-    const cleanedNumber = contactNumber.toString().replace(/\D/g, '').slice(-10);
-    if (cleanedNumber.length !== 10) {
-      return next(new errorhandler("Contact number must be exactly 10 digits", 400));
+    // Web sends the number with its country code (e.g. +61478648984); older clients send 10 digits
+    const raw = contactNumber.toString().trim();
+    const digits = raw.replace(/\D/g, '');
+    let cleanedNumber;
+    if (raw.startsWith('+')) {
+      if (digits.length < 8 || digits.length > 15) {
+        return next(new errorhandler("Please enter a valid mobile number", 400));
+      }
+      cleanedNumber = `+${digits}`;
+    } else {
+      cleanedNumber = digits.slice(-10);
+      if (cleanedNumber.length !== 10) {
+        return next(new errorhandler("Contact number must be exactly 10 digits", 400));
+      }
     }
 
     const personal = await personalDetails.findOne({ where: { userId: targetUserId } });

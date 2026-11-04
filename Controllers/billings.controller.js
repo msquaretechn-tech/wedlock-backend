@@ -4,6 +4,7 @@ import Subscription from "../Models/subscription.model.js";
 import { catchAsyncError } from "../Middlewares/catchAsyncError.js";
 import errorhandler from "../Utils/errorhandler.js";
 import moment from "moment";
+import { Op } from "sequelize";
 
 
 
@@ -18,10 +19,17 @@ export const getBillingInfo = catchAsyncError(async (req, res, next) => {
     }
 
     
-    const latestSubscription = await Subscription.findOne({
-      where: { userId },
-      order: [["createdAt", "DESC"]],
-    });
+    // Prefer the subscription that is currently active (same rule as getActivePlanName),
+    // so billing matches the plan the rest of the app uses; fall back to the latest one.
+    const latestSubscription =
+      (await Subscription.findOne({
+        where: { userId, status: "Active", endDate: { [Op.gt]: new Date() } },
+        order: [["createdAt", "DESC"]],
+      })) ||
+      (await Subscription.findOne({
+        where: { userId },
+        order: [["createdAt", "DESC"]],
+      }));
 
     
 

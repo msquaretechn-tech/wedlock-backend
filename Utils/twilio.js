@@ -44,6 +44,12 @@ export const formatPhoneNumber = (phone, defaultCountryCode = '+91') => {
         return '+' + cleaned.slice(2);
     }
 
+    // Numbers saved before country codes were collected: Australian numbers are stored
+    // in local format with the trunk 0 (e.g. 0478648984 -> +61478648984)
+    if (/^0\d{9}$/.test(cleaned)) {
+        return `+61${cleaned.slice(1)}`;
+    }
+
     // If 10 digits, prepend default country code
     if (cleaned.length === 10) {
         return `${defaultCountryCode}${cleaned}`;

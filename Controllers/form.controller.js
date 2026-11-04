@@ -25,12 +25,10 @@ export const personalDetailsRegister = catchAsyncError(async (req, res, next) =>
         }
         const personalDetailsExist = await personalDetails.findOne({ where: { userId } });
 
-        if (personalDetailsExist) {
-            return res.status(400).json({ success: false, message: "Personal details already exist!" });
-        }
-
-
-        const personal = await personalDetails.create({ firstName, lastName, displayName, contactNumber, maritalStatus, numberOfChildren, aboutYourSelf, userId });
+        // Signup forms have a Back button, so a resubmitted step updates the saved details
+        const personal = personalDetailsExist
+            ? await personalDetailsExist.update({ firstName, lastName, displayName, contactNumber, maritalStatus, numberOfChildren, aboutYourSelf })
+            : await personalDetails.create({ firstName, lastName, displayName, contactNumber, maritalStatus, numberOfChildren, aboutYourSelf, userId });
         await User.update({ isPersonalFormFilled: true }, { where: { userId } });
 
         await recommendation.update({ firstName, lastName, displayName, contactNumber, maritalStatus, numberOfChildren, aboutYourSelf }, { where: { userId } });
@@ -57,11 +55,9 @@ export const qualificationDetailsRegister = catchAsyncError(async (req, res, nex
 
         const qualificationDetailsExist = await qualificationDetails.findOne({ where: { userId } });
 
-        if (qualificationDetailsExist) {
-            return res.status(400).json({ success: false, message: "Qualification details already exist!" });
-        }
-
-        const qualificationData = await qualificationDetails.create({ qualification, currentWorkingStatus, occupation, income, userId });
+        const qualificationData = qualificationDetailsExist
+            ? await qualificationDetailsExist.update({ qualification, currentWorkingStatus, occupation, income })
+            : await qualificationDetails.create({ qualification, currentWorkingStatus, occupation, income, userId });
 
         await recommendation.update({ qualification, currentWorkingStatus, occupation, income }, { where: { userId } });
 
@@ -92,11 +88,9 @@ export const locationDetailsRegister = catchAsyncError(async (req, res, next) =>
 
     const locationDetailsExist = await locationDetails.findOne({ where: { userId } });
 
-    if (locationDetailsExist) {
-        return res.status(400).json({ success: false, message: "Location details already exist!" });
-    }
-
-    const locationDetailsData = await locationDetails.create({ citizenShip, country, state, austrailanVisaStatus, userId });
+    const locationDetailsData = locationDetailsExist
+        ? await locationDetailsExist.update({ citizenShip, country, state, austrailanVisaStatus })
+        : await locationDetails.create({ citizenShip, country, state, austrailanVisaStatus, userId });
 
     await recommendation.update({ citizenShip, country, state, austrailanVisaStatus }, { where: { userId } });
 
@@ -115,11 +109,7 @@ export const otherDetailsRegister = catchAsyncError(async (req, res, next) => {
 
     const otherDetailsExist = await otherDetails.findOne({ where: { userId } });
 
-    if (otherDetailsExist) {
-        return res.status(400).json({ success: false, message: "Other details already exist!" });
-    }
-
-    const otherDetailsData = await otherDetails.create({ 
+    const otherFields = {
         caste: caste || "Not Specified", 
         community: community || "Not Specified", 
         dateOfBirth: dateOfBirth || null, 
@@ -128,8 +118,11 @@ export const otherDetailsRegister = catchAsyncError(async (req, res, next) => {
         placeOfBirth: placeOfBirth || null, 
         ethnicity: ethnicity || "Not Specified",
         motherTongue: motherTongue || "Not Specified",
-        userId 
-    });
+    };
+
+    const otherDetailsData = otherDetailsExist
+        ? await otherDetailsExist.update(otherFields)
+        : await otherDetails.create({ ...otherFields, userId });
 
     await recommendation.update({ 
         caste: caste || "Not Specified", 
@@ -158,10 +151,6 @@ export const imageUploadRegister = catchAsyncError(async (req, res, next) => {
 
         const imageUploadExist = await imageUpload.findOne({ where: { userId } });
 
-        if (imageUploadExist) {
-            return res.status(400).json({ success: false, message: "Image already uploaded!" });
-        }
-
         let userImageUrls;
 
         if (req.files && req.files.length > 0) {
@@ -173,7 +162,9 @@ export const imageUploadRegister = catchAsyncError(async (req, res, next) => {
                 : [userImages.url];
         }
 
-        const imageUploadData = await imageUpload.create({ image: userImageUrls, userId });
+        const imageUploadData = imageUploadExist
+            ? await imageUploadExist.update({ image: userImageUrls })
+            : await imageUpload.create({ image: userImageUrls, userId });
 
         await recommendation.update({ image: userImageUrls }, { where: { userId } });
 
