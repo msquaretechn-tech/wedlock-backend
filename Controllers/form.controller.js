@@ -187,6 +187,57 @@ export const imageUploadRegister = catchAsyncError(async (req, res, next) => {
 
 
 
+// Reorder / delete / replace profile photos in one call.
+// Body: `order` = JSON array, each entry is an existing photo URL (kept, in that position)
+// or "new:<n>" pointing at the n-th uploaded file in `profileImage`.
+export const managePhotos = catchAsyncError(async (req, res, next) => {
+    const userId = req.user.userId;
+    const files = req.files || [];
+    try {
+        let order;
+        try {
+            order = JSON.parse(req.body.order || "[]");
+        } catch {
+            return res.status(400).json({ success: false, message: "Invalid photo order." });
+        }
+        if (!Array.isArray(order) || order.length < 1 || order.length > 3) {
+            return res.status(400).json({ success: false, message: "Your profile needs between 1 and 3 photos." });
+        }
+
+        const existing = await imageUpload.findOne({ where: { userId } });
+        const currentImages = Array.isArray(existing?.image) ? existing.image : [];
+
+        const newIndexes = order.filter((o) => typeof o === "string" && o.startsWith("new:")).map((o) => Number(o.slice(4)));
+        if (newIndexes.some((i) => !Number.isInteger(i) || i < 0 || i >= files.length)) {
+            return res.status(400).json({ success: false, message: "Uploaded photos do not match the photo order." });
+        }
+        // Only the user's own current photos may be kept
+        if (order.some((o) => !String(o).startsWith("new:") && !currentImages.includes(o))) {
+            return res.status(400).json({ success: false, message: "Photo not found on your profile." });
+        }
+
+        let uploadedUrls = [];
+        if (files.length > 0) {
+            const uploaded = await uploadCloudinary(files.map((f) => f.path));
+            uploadedUrls = (Array.isArray(uploaded) ? uploaded : [uploaded]).map((img) => img.url);
+        }
+
+        const finalImages = order.map((o) => (String(o).startsWith("new:") ? uploadedUrls[Number(o.slice(4))] : o));
+
+        if (existing) {
+            await existing.update({ image: finalImages });
+        } else {
+            await imageUpload.create({ image: finalImages, userId });
+        }
+        await recommendation.update({ image: finalImages }, { where: { userId } });
+        await User.update({ isImageFormFilled: true }, { where: { userId } });
+
+        res.status(200).json({ success: true, message: "Photos updated successfully", images: finalImages });
+    } catch (error) {
+        return next(new errorhandler(error.message, 500));
+    }
+});
+
 export const updateAboutAndImages = catchAsyncError(async (req, res, next) => {
     const userId = req.user.userId;
 
