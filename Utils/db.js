@@ -2,11 +2,10 @@ import dotenv from 'dotenv';
 import { Sequelize } from 'sequelize';
 dotenv.config();
 
+// Never log the password: these logs end up in `docker logs` on the server
 console.log({
     DATABASE: process.env.DATABASE,
     USER: process.env.USER,
-    PASSWORD: process.env.PASSWORD,
-    // HOST: process.env.HOST
     HOST: process.env.HOST || "postgres"
 });
 

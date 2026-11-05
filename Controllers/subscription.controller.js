@@ -14,7 +14,7 @@ import paypalClient from "../config/paypal.js";
 import paypal from "@paypal/checkout-server-sdk";
 import sendEmail from "../Utils/sendMail.js";
 import { validateExclusiveEligibility, EXCLUSIVE_CRITERIA_LIST } from "../Utils/exclusiveCriteria.js";
-import { syncUserActivePlan } from "../Utils/activePlan.js";
+import { syncUserActivePlan, getActivePlanName } from "../Utils/activePlan.js";
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -41,6 +41,15 @@ export const createCheckoutSession = catchAsyncError(
 
         if (!planData) {
             return next(new errorhandler("Plan not found", 404));
+        }
+
+        // A paid plan can only be renewed or changed after it has expired
+        const activePlan = await getActivePlanName(userId);
+        if (activePlan !== "Standard") {
+            return res.status(400).json({
+                success: false,
+                message: `Your ${activePlan} plan is still active. You can renew or change your plan once it expires.`,
+            });
         }
 
         // Validate Exclusive plan criteria
