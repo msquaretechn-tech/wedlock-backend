@@ -25,6 +25,7 @@ import admin from 'firebase-admin';
 import { firebaseAdmin } from "./notification.controller.js";
 import { SuspendedUser } from "../Models/association.js";
 import { sendOtpToPhone, verifyPhoneOtp } from "../Utils/twilio.js";
+import { isDemoAccount, demoLoginOtp, demoActivationCode } from "../Utils/demoAccount.js";
 
 import { getActivePlanName, syncUserActivePlan } from "../Utils/activePlan.js";
 dotenv.config();
@@ -42,6 +43,15 @@ export const registrationUser = catchAsyncError(async (req, res, next) => {
 
         if (isEmailExist) {
             return next(new errorhandler("You are already registered!", 400));
+        }
+
+        // Demo/review account: fixed code and no email (the address may not be a real inbox)
+        if (isDemoAccount(email)) {
+            const demoToken = createActivationToken(email, demoActivationCode());
+            return res.status(200).json({
+                success: true, message: `Please check your email: ${email} to activate your account!`,
+                activationToken: demoToken.token,
+            });
         }
 
         const activationToken = createActivationToken(email);
@@ -69,8 +79,8 @@ export const registrationUser = catchAsyncError(async (req, res, next) => {
     }
 });
 
-export const createActivationToken = (email) => {
-    const activationCode = Math.floor(1000 + Math.random() * 9000).toString();
+export const createActivationToken = (email, fixedCode) => {
+    const activationCode = fixedCode || Math.floor(1000 + Math.random() * 9000).toString();
 
     const token = jwt.sign({ email, activationCode }, process.env.ACTIVATION_SECRET, {
         expiresIn: "5m",
@@ -362,6 +372,17 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
             return next(new errorhandler("No mobile number is registered on this account. Please contact support.", 400));
         }
 
+        // Demo/review account: no SMS is sent, the fixed DEMO_OTP is accepted in step 2
+        if (isDemoAccount(user.email)) {
+            return res.status(200).json({
+                success: true,
+                otpRequired: true,
+                maskedPhone: maskMobile(phone),
+                message: "OTP sent to your registered mobile number!",
+                isDemo: false,
+            });
+        }
+
         const result = await sendOtpToPhone(phone, "+91");
         res.status(200).json({
             success: true,
@@ -391,7 +412,9 @@ export const verifyMobileOtpAndLogin = catchAsyncError(async (req, res, next) =>
             return next(new errorhandler("No mobile number is registered on this account. Please contact support.", 400));
         }
 
-        const isVerified = await verifyPhoneOtp(phone, otp, "+91");
+        const isVerified = isDemoAccount(user.email)
+            ? String(otp).trim() === demoLoginOtp()
+            : await verifyPhoneOtp(phone, otp, "+91");
         if (!isVerified) {
             return next(new errorhandler("Invalid or expired OTP!", 400));
         }
@@ -541,6 +564,15 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
             return next(new errorhandler("User not registered with Wedlock!", 400));
         }
 
+
+        // Demo/review account: fixed 4-digit code and no email
+        if (isDemoAccount(email)) {
+            const demoToken = createActivationToken(email, demoActivationCode());
+            return res.status(200).json({
+                success: true, message: `Please check your email: ${email} for a verification code!`,
+                activationToken: demoToken.token,
+            });
+        }
 
         const activationToken = createActivationToken(email);
         const activationCode = activationToken.activationCode;
