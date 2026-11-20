@@ -94,7 +94,7 @@ export const sendOtpToPhone = async (phone, defaultCountryCode = '+91') => {
             success: true,
             status: verification.status,
             formattedPhone,
-            message: 'OTP sent successfully via Twilio Verify'
+            message: 'OTP sent successfully to your mobile number'
         };
     }
 
@@ -115,7 +115,7 @@ export const sendOtpToPhone = async (phone, defaultCountryCode = '+91') => {
             success: true,
             status: 'pending',
             formattedPhone,
-            message: 'OTP sent successfully via Twilio SMS'
+            message: 'OTP sent successfully to your mobile number'
         };
     }
 

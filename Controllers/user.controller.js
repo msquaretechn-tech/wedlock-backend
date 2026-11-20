@@ -378,7 +378,7 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
                 success: true,
                 otpRequired: true,
                 maskedPhone: maskMobile(phone),
-                message: "OTP sent to your registered mobile number!",
+                message: "OTP sent successfully to your mobile number",
                 isDemo: false,
             });
         }
@@ -388,7 +388,7 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
             success: true,
             otpRequired: true,
             maskedPhone: maskMobile(phone),
-            message: result.message || "OTP sent to your registered mobile number!",
+            message: result.message || "OTP sent successfully to your mobile number",
             isDemo: result.isDemo || false,
         });
     } catch (error) {
