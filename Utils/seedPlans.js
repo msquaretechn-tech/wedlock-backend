@@ -59,7 +59,8 @@ export const ensureSubscriptionPlans = async () => {
           "Create photo profile",
           "Send friend requests",
           "View profiles in full",
-          "Audio & video calling",
+          "Audio & video calling (15 mins per call for each profile)",
+          "Send unlimited messages",
           "Priority customer support",
         ];
 
@@ -70,7 +71,8 @@ export const ensureSubscriptionPlans = async () => {
           "All Premium plan features included",
           "Dedicated relationship manager",
           "Advanced horoscope matching",
-          "Unlimited audio & video calls",
+          "Audio & video calling (30 mins per call for each profile)",
+          "Send unlimited messages",
           "Top priority profile spotlight",
         ];
 
